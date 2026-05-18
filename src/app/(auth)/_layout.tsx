@@ -4,20 +4,17 @@ export default function AuthLayout() {
     return (
         <Stack
             screenOptions={{
-                // Ẩn header cho tất cả các màn hình trong nhóm này (thường dùng cho Login)
                 headerShown: false,
-                // Hiệu ứng chuyển trang mượt mà
                 animation: 'fade',
             }}
         >
-            {/* Bạn có thể định nghĩa cụ thể từng màn hình hoặc để mặc định */}
-            <Stack.Screen name="LoginScreen" options={{ title: 'Login' }} />
+            <Stack.Screen name="login" options={{ title: 'Login' }} />
             <Stack.Screen
-                name="ResetPasswordScreen"
+                name="reset-pass"
                 options={{ title: 'Reset Password' }}
             />
             <Stack.Screen
-                name="FirstTimeReset"
+                name="first-time-login"
                 options={{ title: 'Change Password' }}
             />
         </Stack>

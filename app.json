@@ -4,7 +4,7 @@
         "slug": "dormly-app",
         "version": "1.0.0",
         "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
+        "icon": "./assets/dormly-logo.png",
         "scheme": "dormlyapp",
         "userInterfaceStyle": "automatic",
         "ios": {
@@ -21,7 +21,7 @@
         },
         "web": {
             "output": "static",
-            "favicon": "./assets/images/favicon.png",
+            "favicon": "./assets/dormly-logo.png",
             "bundler": "metro"
         },
         "plugins": [
