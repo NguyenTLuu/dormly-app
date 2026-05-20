@@ -17,7 +17,7 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                 </Link>
 
-                <Link href="/reset-pass" asChild>
+                <Link href="/forgot-pass" asChild>
                     <TouchableOpacity className="bg-gray-500 px-6 py-3 rounded-full mt-4">
                         <Text className="text-white font-bold text-center">
                             Reset Pass
@@ -29,6 +29,14 @@ export default function HomeScreen() {
                     <TouchableOpacity className="bg-gray-500 px-6 py-3 rounded-full mt-4">
                         <Text className="text-white font-bold text-center">
                             First Time Login
+                        </Text>
+                    </TouchableOpacity>
+                </Link>
+
+                <Link href="/home" asChild>
+                    <TouchableOpacity className="bg-gray-500 px-6 py-3 rounded-full mt-4">
+                        <Text className="text-white font-bold text-center">
+                            Home
                         </Text>
                     </TouchableOpacity>
                 </Link>

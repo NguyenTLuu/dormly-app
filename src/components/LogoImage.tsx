@@ -22,7 +22,7 @@ export default function LogoImage() {
             </View>
             <View className="h-48 w-screen mb-6">
                 <Image
-                    source={require('@/assets/dorm-image.png')}
+                    source={require('@/assets/dorm-image-transparent.png')}
                     style={{ width: '100%', height: '100%' }}
                     contentFit="cover"
                 />

@@ -82,9 +82,11 @@ export default function Login() {
                                     transform: [{ scale: 0.85 }],
                                 }}
                             />
-                            <Text className="ml-1 text-sm font-medium">Remember me</Text>
+                            <Text className="ml-1 text-sm font-medium">
+                                Remember me
+                            </Text>
                         </View>
-                        <Link href="/reset-pass" asChild>
+                        <Link href="/forgot-pass" asChild>
                             <TouchableOpacity activeOpacity={0.4}>
                                 <Text className="text-blue-500 text-sm font-medium">
                                     Forget your password?
