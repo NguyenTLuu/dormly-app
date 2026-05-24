@@ -1,4 +1,10 @@
-import { View, Text, StatusBar, TouchableOpacity } from 'react-native';
+import {
+    View,
+    Text,
+    StatusBar,
+    TouchableOpacity,
+    ScrollView,
+} from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
 import { Image } from 'expo-image';
 import React from 'react';
@@ -16,9 +22,9 @@ export default function HomeScreen() {
                 backgroundColor="transparent"
                 barStyle="light-content"
             />
-            <View className="bg-white flex-1 relative">
+            <ScrollView className="bg-white flex-1 relative">
                 <View
-                    className="bg-blue-600 px-5 rounded-b-2xl "
+                    className="bg-blue-600 px-5 rounded-b-2xl"
                     style={{
                         paddingTop: insets.top + 16,
                         paddingBottom: 50,
@@ -256,7 +262,7 @@ export default function HomeScreen() {
                         contentFit="cover"
                     />
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         </>
     );
 }
