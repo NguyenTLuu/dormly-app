@@ -40,7 +40,7 @@ export default function ProfileScreen() {
             />
             <ScrollView className="bg-white flex-1 relative">
                 <View
-                    className="bg-blue-600 px-5 rounded-b-2xl"
+                    className="bg-blue-600 rounded-b-2xl"
                     style={{ paddingTop: insets.top + 16, paddingBottom: 100 }}
                 />
                 <View className="mx-4 p-4 bg-white -mt-10 shadow-xl border-gray-900 flex-row items-center rounded-2xl">
@@ -67,7 +67,7 @@ export default function ProfileScreen() {
                             Software Engineer
                         </Text>
                     </View>
-                    <TouchableOpacity className="flex-row items-center justify-center gap-2 p-2 border-2 border-blue-500 rounded-xl">
+                    <TouchableOpacity className="flex-row items-center justify-center gap-2 p-2 border border-blue-500 rounded-xl">
                         <FontAwesome6 name="pencil" size={16} color="#3b82f6" />
                         <Text className="font-medium text-sm text-blue-500">
                             Edit
@@ -125,7 +125,7 @@ export default function ProfileScreen() {
                                 Floor 2 · Block 1
                             </Text>
                         </View>
-                        <TouchableOpacity className="p-2 rounded-xl border-blue-500 border-2">
+                        <TouchableOpacity className="p-2 rounded-xl border-blue-500 border">
                             <Text className="text-blue-500 font-medium text-sm">
                                 View Detail
                             </Text>

@@ -11,10 +11,11 @@ import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { Link, useRouter } from 'expo-router';
 
 export default function HomeScreen() {
     const insets = useSafeAreaInsets();
-
+    const router = useRouter();
     return (
         <>
             <StatusBar
@@ -67,11 +68,13 @@ export default function HomeScreen() {
                                 Block 1
                             </Text>
                         </View>
-                        <TouchableOpacity className="justify-center">
-                            <Text className="text-blue-600 font-semibold text-base border border-blue-200 px-4 py-2 rounded-xl bg-white">
-                                Detail
-                            </Text>
-                        </TouchableOpacity>
+                        <Link href="/room" asChild>
+                            <TouchableOpacity className="justify-center">
+                                <Text className="text-blue-600 font-semibold text-base border border-blue-500 px-4 py-2 rounded-xl bg-white">
+                                    Detail
+                                </Text>
+                            </TouchableOpacity>
+                        </Link>
                     </View>
                 </View>
 
