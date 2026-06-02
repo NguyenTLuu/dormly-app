@@ -40,9 +40,14 @@ export default function ProfileScreen() {
             />
             <ScrollView className="bg-white flex-1 relative">
                 <View
-                    className="bg-blue-600 rounded-b-2xl"
-                    style={{ paddingTop: insets.top + 16, paddingBottom: 100 }}
-                />
+                    className="bg-blue-600 rounded-b-2xl px-8"
+                    style={{ paddingTop: insets.top + 16, paddingBottom: 50 }}
+                >
+                    <Text className="text-white text-2xl font-bold">
+                        Profile
+                    </Text>
+                    <Text className="text-white">Manage your information</Text>
+                </View>
                 <View className="mx-4 p-4 bg-white -mt-10 shadow-xl border-gray-900 flex-row items-center rounded-2xl">
                     <View className="w-28 h-28 rounded-full items-center justify-center relative">
                         <Image

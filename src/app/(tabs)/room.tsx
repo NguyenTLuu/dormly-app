@@ -35,12 +35,17 @@ export default function RoomScreen() {
             />
             <ScrollView className="bg-white flex-1 relative">
                 <View
-                    className="bg-blue-600 rounded-b-2xl"
+                    className="bg-blue-600 rounded-b-2xl px-8"
                     style={{
                         paddingTop: insets.top + 16,
-                        paddingBottom: 100,
+                        paddingBottom: 50,
                     }}
-                />
+                >
+                    <Text className="text-2xl text-white font-bold">Room</Text>
+                    <Text className="text-white">
+                        Manage your room and stay
+                    </Text>
+                </View>
                 <SectionCard className="-mt-10 mx-4">
                     <View className="flex-row flex-1 border-b border-gray-100 pb-3">
                         <View className="h-20 w-20 rounded-full bg-blue-200 items-center justify-center">
