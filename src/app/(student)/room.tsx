@@ -43,7 +43,7 @@ export default function RoomScreen() {
                 >
                     <Text className="text-2xl text-white font-bold">Room</Text>
                     <Text className="text-white">
-                        Manage your room and stay
+                        Manage your room and stays
                     </Text>
                 </View>
                 <SectionCard className="-mt-10 mx-4">

@@ -23,7 +23,7 @@ import ActionRow from '@/components/ActionRow';
 import StatusBadge from '@/components/StatusBadge';
 import ScrollView = Animated.ScrollView;
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
     const router = useRouter();
@@ -130,11 +130,13 @@ export default function ProfileScreen() {
                                 Floor 2 · Block 1
                             </Text>
                         </View>
-                        <TouchableOpacity className="p-2 rounded-xl border-blue-500 border">
-                            <Text className="text-blue-500 font-medium text-sm">
-                                View Detail
-                            </Text>
-                        </TouchableOpacity>
+                        <Link href="/room" asChild>
+                            <TouchableOpacity className="p-2 rounded-xl border-blue-500 border">
+                                <Text className="text-blue-500 font-medium text-sm">
+                                    View Detail
+                                </Text>
+                            </TouchableOpacity>
+                        </Link>
                     </View>
                 </SectionCard>
 
