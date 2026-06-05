@@ -4,9 +4,13 @@ import {
     StatusBar,
     TouchableOpacity,
     Animated,
+    TextInput,
+    Platform,
+    KeyboardAvoidingView,
+    Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import React from 'react';
+import React, { useState } from 'react';
 import { Image } from 'expo-image';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -24,12 +28,38 @@ import StatusBadge from '@/components/StatusBadge';
 import ScrollView = Animated.ScrollView;
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { Link, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const handleLogOut = () => {
         router.replace('/login');
+    };
+
+    // 1. Khởi tạo Mock Data
+    const [profileData, setProfileData] = useState({
+        fullName: 'Nguyen Van A',
+        studentId: '2231200123',
+        email: 'a.nguyenvan.cit22@eiu.edu.vn',
+        phone: '0123456789',
+        dob: '01/01/2004',
+        major: 'Software Engineer',
+    });
+
+    // 2. State quản lý Modal và form tạm thời khi edit
+    const [isEditModalVisible, setEditModalVisible] = useState(false);
+    const [editForm, setEditForm] = useState(profileData);
+
+    // 3. Hàm xử lý mở Modal và Lưu dữ liệu
+    const handleOpenEdit = () => {
+        setEditForm(profileData); // Copy dữ liệu hiện tại vào form
+        setEditModalVisible(true);
+    };
+
+    const handleSave = () => {
+        setProfileData(editForm); // Cập nhật dữ liệu mới
+        setEditModalVisible(false);
     };
     return (
         <>
@@ -64,15 +94,20 @@ export default function ProfileScreen() {
                         </TouchableOpacity>
                     </View>
                     <View className="flex-1 flex-col gap-2 ml-2">
-                        <Text className="font-bold text-xl">Nguyen Van A</Text>
-                        <Text className="font-medium text-sm text-gray-500">
-                            Student ID: 2231200123
+                        <Text className="font-bold text-xl">
+                            {profileData.fullName}
                         </Text>
                         <Text className="font-medium text-sm text-gray-500">
-                            Software Engineer
+                            Student ID: {profileData.studentId}
+                        </Text>
+                        <Text className="font-medium text-sm text-gray-500">
+                            {profileData.major}
                         </Text>
                     </View>
-                    <TouchableOpacity className="flex-row items-center justify-center gap-2 p-2 border border-blue-500 rounded-xl">
+                    <TouchableOpacity
+                        className="flex-row items-center justify-center gap-2 p-2 border border-blue-500 rounded-xl"
+                        onPress={handleOpenEdit}
+                    >
                         <FontAwesome6 name="pencil" size={16} color="#3b82f6" />
                         <Text className="font-medium text-sm text-blue-500">
                             Edit
@@ -83,25 +118,34 @@ export default function ProfileScreen() {
                 <SectionCard className="mt-4 mx-4 flex-col">
                     <Text className="font-bold">Personal Information</Text>
                     <View className="px-2">
-                        <InfoRow label={'Full name'} value={'Nguyen Van A'}>
+                        <InfoRow
+                            label={'Full name'}
+                            value={profileData.fullName}
+                        >
                             <FontAwesome5 name="user" size={20} color="black" />
                         </InfoRow>
-                        <InfoRow label={'Student ID'} value={'2231200123'}>
+                        <InfoRow
+                            label={'Student ID'}
+                            value={profileData.studentId}
+                        >
                             <AntDesign name="idcard" size={20} color="black" />
                         </InfoRow>
-                        <InfoRow label={'Faculty'} value={'Software Engineer'}>
+                        <InfoRow label={'Faculty'} value={profileData.major}>
                             <Entypo
                                 name="graduation-cap"
                                 size={22}
                                 color="black"
                             />
                         </InfoRow>
-                        <InfoRow label={'Phone number'} value={'0909141516'}>
+                        <InfoRow
+                            label={'Phone number'}
+                            value={profileData.phone}
+                        >
                             <Feather name="phone" size={20} color="black" />
                         </InfoRow>
                         <InfoRow
                             label={'Email'}
-                            value={'a.nguyenvan.cit22@eiu.edu.vn'}
+                            value={profileData.email}
                             isLast={true}
                         >
                             <MaterialCommunityIcons
@@ -207,6 +251,113 @@ export default function ProfileScreen() {
                         </TouchableOpacity>
                     </View>
                 </SectionCard>
+                <Modal
+                    visible={isEditModalVisible}
+                    animationType="slide"
+                    transparent={true}
+                    onRequestClose={() => setEditModalVisible(false)}
+                >
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        className="flex-1 justify-end bg-black/50"
+                    >
+                        <View className="bg-white rounded-t-3xl p-6">
+                            <View className="flex-row justify-between items-center mb-6">
+                                <Text className="text-xl font-bold text-gray-800">
+                                    Edit Personal Info
+                                </Text>
+                                <TouchableOpacity
+                                    onPress={() => setEditModalVisible(false)}
+                                >
+                                    <Ionicons
+                                        name="close"
+                                        size={24}
+                                        color="#4b5563"
+                                    />
+                                </TouchableOpacity>
+                            </View>
+
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                className="space-y-4"
+                            >
+                                {/* Email */}
+                                <View>
+                                    <Text className="text-gray-500 mb-1 text-sm">
+                                        Email
+                                    </Text>
+                                    <TextInput
+                                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
+                                        value={editForm.email}
+                                        onChangeText={(text) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                email: text,
+                                            })
+                                        }
+                                        keyboardType="email-address"
+                                    />
+                                </View>
+
+                                {/* Phone */}
+                                <View>
+                                    <Text className="text-gray-500 mb-1 text-sm">
+                                        Phone Number
+                                    </Text>
+                                    <TextInput
+                                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
+                                        value={editForm.phone}
+                                        onChangeText={(text) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                phone: text,
+                                            })
+                                        }
+                                        keyboardType="phone-pad"
+                                    />
+                                </View>
+
+                                {/* DOB */}
+                                <View>
+                                    <Text className="text-gray-500 mb-1 text-sm">
+                                        Date of Birth
+                                    </Text>
+                                    <TextInput
+                                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
+                                        value={editForm.dob}
+                                        onChangeText={(text) =>
+                                            setEditForm({
+                                                ...editForm,
+                                                dob: text,
+                                            })
+                                        }
+                                    />
+                                </View>
+                            </ScrollView>
+
+                            {/* Action Buttons */}
+                            <View className="flex-row mt-6 space-x-3 mb-4">
+                                <TouchableOpacity
+                                    className="flex-1 bg-gray-100 py-3 rounded-xl items-center"
+                                    onPress={() => setEditModalVisible(false)}
+                                >
+                                    <Text className="text-gray-600 font-semibold">
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    className="flex-1 bg-blue-500 py-3 rounded-xl items-center"
+                                    onPress={handleSave}
+                                >
+                                    <Text className="text-white font-semibold">
+                                        Save
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </KeyboardAvoidingView>
+                </Modal>
             </ScrollView>
         </>
     );

@@ -2,9 +2,9 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function StudentTabsLayout() {
-    const size = 22;
+export default function ManagerTabLayout() {
     const insets = useSafeAreaInsets();
+    const size = 22;
     return (
         <Tabs
             screenOptions={{
@@ -23,18 +23,27 @@ export default function StudentTabsLayout() {
             }}
         >
             <Tabs.Screen
-                name="home"
+                name="dashboard"
                 options={{
-                    title: 'Home',
+                    title: 'Dashboard',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="home" size={size} color={color} />
+                        <Ionicons name="pie-chart" size={size} color={color} />
                     ),
                 }}
             />
             <Tabs.Screen
-                name="room"
+                name="requests"
                 options={{
-                    title: 'Room',
+                    title: 'Requests',
+                    tabBarIcon: ({ color }) => (
+                        <Ionicons name="clipboard" size={size} color={color} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="management"
+                options={{
+                    title: 'Manage',
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="business" size={size} color={color} />
                     ),
@@ -45,20 +54,7 @@ export default function StudentTabsLayout() {
                 options={{
                     title: 'Chat',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="chatbubble" size={24} color={color} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="notification"
-                options={{
-                    title: 'Notification',
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons
-                            name="notifications"
-                            size={size}
-                            color={color}
-                        />
+                        <Ionicons name="chatbubbles" size={24} color={color} />
                     ),
                 }}
             />
@@ -67,7 +63,7 @@ export default function StudentTabsLayout() {
                 options={{
                     title: 'Profile',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="person" size={size} color={color} />
+                        <Ionicons name="person" size={24} color={color} />
                     ),
                 }}
             />

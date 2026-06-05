@@ -196,19 +196,21 @@ export default function HomeScreen() {
                             </Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity
-                            className="w-[23%] h-24 bg-white rounded-2xl p-2 items-center justify-center border border-gray-100 shadow-sm shadow-gray-200 elevation-1"
-                            activeOpacity={0.5}
-                        >
-                            <Ionicons
-                                name="chatbubble-ellipses"
-                                size={28}
-                                color="#3B82F6"
-                            />
-                            <Text className="text-[#334155] text-[11px] font-semibold text-center mt-2 leading-tight">
-                                Internal chat
-                            </Text>
-                        </TouchableOpacity>
+                        <Link href="/chat/bot" asChild>
+                            <TouchableOpacity
+                                className="w-[23%] h-24 bg-white rounded-2xl p-2 items-center justify-center border border-gray-100 shadow-sm shadow-gray-200 elevation-1"
+                                activeOpacity={0.5}
+                            >
+                                <MaterialCommunityIcons
+                                    name="robot-outline"
+                                    size={30}
+                                    color="#9333EA"
+                                />
+                                <Text className="text-[#334155] text-[11px] font-semibold text-center mt-2 leading-tight">
+                                    Chat bot
+                                </Text>
+                            </TouchableOpacity>
+                        </Link>
                     </View>
                 </View>
                 <View className="mx-4 mt-6">
@@ -258,13 +260,6 @@ export default function HomeScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <TouchableOpacity className="absolute w-20 h-20 bg-[#D7E9FD] bottom-20 right-4 justify-center items-center rounded-full opacity-90">
-                    <Image
-                        source={require('@/assets/icons/robot-icon.png')}
-                        style={{ width: '80%', height: '80%' }}
-                        contentFit="cover"
-                    />
-                </TouchableOpacity>
             </ScrollView>
         </>
     );

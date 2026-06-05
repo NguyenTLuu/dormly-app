@@ -8,23 +8,30 @@ import {
     TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import SectionCard from '@/components/SectionCard';
 import { useRouter } from 'expo-router';
+import ChatItem, { ChatProps } from '@/components/ChatItem';
 
-type ChatType = 'manager' | 'group' | 'roommate';
-
-interface ChatProps {
+export interface ChatMessage {
     id: string;
-    name: string;
-    lastMessage: string;
+    text: string;
     time: string;
-    unreadCount: number;
-    type: ChatType;
-    initials?: string;
+    isMe: boolean;
+    senderName?: string;
+    senderInitials?: string;
+    senderColor?: string;
 }
 
-const MOCK_CHATS: ChatProps[] = [
+const CHAT_LIST_BASE: ChatProps[] = [
+    {
+        id: 'bot',
+        name: 'Dorm Assistant Bot',
+        lastMessage: 'How can I help you today?',
+        time: 'Now',
+        unreadCount: 1,
+        type: 'bot',
+    },
     {
         id: '1',
         name: 'Dormitory Manager',
@@ -61,86 +68,149 @@ const MOCK_CHATS: ChatProps[] = [
     },
 ];
 
-const ChatItem = ({
-    data,
-    isLast,
-    onPress,
-}: {
-    data: ChatProps;
-    isLast: boolean;
-    onPress: () => void;
-}) => {
-    const renderAvatar = () => {
-        if (data.type === 'manager') {
-            return (
-                <View className="w-12 h-12 rounded-full bg-orange-50 items-center justify-center">
-                    <MaterialCommunityIcons
-                        name="shield-account"
-                        size={24}
-                        color="#EA580C"
-                    />
-                    <View className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
-                </View>
-            );
-        } else if (data.type === 'group') {
-            return (
-                <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center">
-                    <MaterialCommunityIcons
-                        name="account-group"
-                        size={24}
-                        color="#2563EB"
-                    />
-                </View>
-            );
-        } else {
-            return (
-                <View className="w-12 h-12 rounded-full bg-[#EFF6FF] items-center justify-center">
-                    <Text className="text-blue-600 font-bold text-[16px]">
-                        {data.initials}
-                    </Text>
-                    <View className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-gray-400 border-2 border-white rounded-full" />
-                </View>
-            );
-        }
-    };
-
-    return (
-        <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={onPress}
-            className={`flex-row items-center py-4 ${!isLast ? 'border-b border-gray-100' : ''}`}
-        >
-            {renderAvatar()}
-            <View className="flex-1 ml-3 justify-center">
-                <View className="flex-row justify-between items-center mb-1">
-                    <Text className="text-[16px] font-bold text-[#1E293B]">
-                        {data.name}
-                    </Text>
-                    <Text
-                        className={`text-[12px] font-medium ${data.unreadCount > 0 ? 'text-blue-600' : 'text-[#94A3B8]'}`}
-                    >
-                        {data.time}
-                    </Text>
-                </View>
-                <View className="flex-row justify-between items-center">
-                    <Text
-                        className={`text-[14px] flex-1 mr-4 ${data.unreadCount > 0 ? 'text-[#1E293B] font-semibold' : 'text-[#64748B]'}`}
-                        numberOfLines={1}
-                    >
-                        {data.lastMessage}
-                    </Text>
-                    {data.unreadCount > 0 && (
-                        <View className="w-5 h-5 bg-blue-600 rounded-full items-center justify-center">
-                            <Text className="text-white text-[10px] font-bold">
-                                {data.unreadCount}
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
+export const MOCK_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
+    '1': [
+        {
+            id: '1-1',
+            text: 'Good morning, please remember to pay the electricity bill by Friday.',
+            time: '10:30 AM',
+            isMe: false,
+            senderName: 'Dormitory Manager',
+            senderInitials: 'DM',
+            senderColor: '#EA580C',
+        },
+        {
+            id: '1-2',
+            text: 'Thanks for reminding me. Can I pay it through the student portal?',
+            time: '10:33 AM',
+            isMe: true,
+        },
+        {
+            id: '1-3',
+            text: 'Yes, please use the payment section in the Dormly app.',
+            time: '10:35 AM',
+            isMe: false,
+            senderName: 'Dormitory Manager',
+            senderInitials: 'DM',
+            senderColor: '#EA580C',
+        },
+    ],
+    '2': [
+        {
+            id: '2-1',
+            text: 'Who is buying water today?',
+            time: '9:15 AM',
+            isMe: false,
+            senderName: 'Tran Phuoc',
+            senderInitials: 'TP',
+            senderColor: '#2563EB',
+        },
+        {
+            id: '2-2',
+            text: 'I can buy it after my afternoon class.',
+            time: '9:17 AM',
+            isMe: true,
+        },
+        {
+            id: '2-3',
+            text: 'Great. I will transfer my share tonight.',
+            time: '9:18 AM',
+            isMe: false,
+            senderName: 'Le Duc',
+            senderInitials: 'LD',
+            senderColor: '#16A34A',
+        },
+        {
+            id: '2-4',
+            text: 'Please also get trash bags if the store has them.',
+            time: '9:20 AM',
+            isMe: false,
+            senderName: 'Minh Anh',
+            senderInitials: 'MA',
+            senderColor: '#9333EA',
+        },
+        {
+            id: '2-5',
+            text: 'Okay, I will update the receipt here later.',
+            time: '9:22 AM',
+            isMe: true,
+        },
+    ],
+    '3': [
+        {
+            id: '3-1',
+            text: 'Are you in the room right now?',
+            time: 'Yesterday',
+            isMe: false,
+            senderName: 'Tran Phuoc',
+            senderInitials: 'TP',
+            senderColor: '#2563EB',
+        },
+        {
+            id: '3-2',
+            text: "Yes, I just got back from class. What's up?",
+            time: 'Yesterday',
+            isMe: true,
+        },
+        {
+            id: '3-3',
+            text: 'Can you check if I left my keys on the table?',
+            time: 'Yesterday',
+            isMe: false,
+            senderName: 'Tran Phuoc',
+            senderInitials: 'TP',
+            senderColor: '#2563EB',
+        },
+        {
+            id: '3-4',
+            text: 'Found them. They are next to your laptop.',
+            time: 'Yesterday',
+            isMe: true,
+        },
+    ],
+    '4': [
+        {
+            id: '4-1',
+            text: 'Can you bring the charger from the study room?',
+            time: 'May 15',
+            isMe: true,
+        },
+        {
+            id: '4-2',
+            text: 'Okay, I will bring it later.',
+            time: 'May 15',
+            isMe: false,
+            senderName: 'Le Duc',
+            senderInitials: 'LD',
+            senderColor: '#16A34A',
+        },
+        {
+            id: '4-3',
+            text: 'Thanks, leave it on my desk if I am not back yet.',
+            time: 'May 15',
+            isMe: true,
+        },
+    ],
 };
+
+const getChatPreview = (chat: ChatProps): ChatProps => {
+    const lastMessage = MOCK_CHAT_MESSAGES[chat.id]?.at(-1);
+
+    if (!lastMessage) return chat;
+
+    const senderPrefix =
+        chat.type === 'group'
+            ? `${lastMessage.isMe ? 'You' : lastMessage.senderName}: `
+            : '';
+
+    return {
+        ...chat,
+        lastMessage: `${senderPrefix}${lastMessage.text}`,
+        time: lastMessage.time,
+    };
+};
+
+export const MOCK_CHATS: ChatProps[] = CHAT_LIST_BASE.map(getChatPreview);
 
 export default function ChatScreen() {
     const insets = useSafeAreaInsets();
@@ -148,7 +218,7 @@ export default function ChatScreen() {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<
-        'All' | 'Roommate' | 'Manager' | 'Group'
+        'All' | 'Roommate' | 'Manager' | 'Group' | 'Bot'
     >('All');
 
     const filteredChats = MOCK_CHATS.filter((chat) => {
@@ -163,6 +233,7 @@ export default function ChatScreen() {
             return matchesSearch && chat.type === 'manager';
         if (activeFilter === 'Group')
             return matchesSearch && chat.type === 'group';
+        if (activeFilter === 'Bot') return matchesSearch && chat.type === 'bot';
 
         return matchesSearch;
     });
@@ -206,24 +277,30 @@ export default function ChatScreen() {
                         showsHorizontalScrollIndicator={false}
                         className="flex-row"
                     >
-                        {(['All', 'Roommate', 'Manager', 'Group'] as const).map(
-                            (filter) => {
-                                const isActive = activeFilter === filter;
-                                return (
-                                    <TouchableOpacity
-                                        key={filter}
-                                        onPress={() => setActiveFilter(filter)}
-                                        className={`px-4 py-2 mr-2 rounded-full border ${isActive ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-200'}`}
+                        {(
+                            [
+                                'All',
+                                'Roommate',
+                                'Manager',
+                                'Group',
+                                'Bot',
+                            ] as const
+                        ).map((filter) => {
+                            const isActive = activeFilter === filter;
+                            return (
+                                <TouchableOpacity
+                                    key={filter}
+                                    onPress={() => setActiveFilter(filter)}
+                                    className={`px-4 py-2 mr-2 rounded-full border ${isActive ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-200'}`}
+                                >
+                                    <Text
+                                        className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-500'}`}
                                     >
-                                        <Text
-                                            className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-500'}`}
-                                        >
-                                            {filter}
-                                        </Text>
-                                    </TouchableOpacity>
-                                );
-                            }
-                        )}
+                                        {filter}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
                     </ScrollView>
                 </View>
 
@@ -237,11 +314,15 @@ export default function ChatScreen() {
                                 key={chat.id}
                                 data={chat}
                                 isLast={index === filteredChats.length - 1}
-                                onPress={() =>
-                                    router.push(
-                                        `/chat/${chat.id}?name=${encodeURIComponent(chat.name)}`
-                                    )
-                                }
+                                onPress={() => {
+                                    if (chat.id === 'bot') {
+                                        router.push('/chat/bot');
+                                    } else {
+                                        router.push(
+                                            `/chat/${chat.id}?name=${encodeURIComponent(chat.name)}&type=${chat.type}`
+                                        );
+                                    }
+                                }}
                             />
                         ))}
                         {filteredChats.length === 0 && (

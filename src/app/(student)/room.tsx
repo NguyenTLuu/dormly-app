@@ -47,7 +47,7 @@ export default function RoomScreen() {
                     </Text>
                 </View>
                 <SectionCard className="-mt-10 mx-4">
-                    <View className="flex-row flex-1 border-b border-gray-100 pb-3">
+                    <View className="flex-row border-b border-gray-100 pb-3">
                         <View className="h-20 w-20 rounded-full bg-blue-200 items-center justify-center">
                             <Image
                                 source={require('@/assets/icons/door-icon.png')}

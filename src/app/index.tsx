@@ -1,46 +1,34 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, TouchableOpacity, View } from 'react-native';
-import { Link } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 
-export default function HomeScreen() {
-    const router = useRouter();
+const useAuth = () => {
+    // Todo: replace with actual logic to get user data (Redux/Zustand/AsyncStorage)
+    return {
+        isLoading: false,
+        isAuthenticated: false,
+        userRole: 'STUDENT',
+    };
+};
 
-    return (
-        <SafeAreaView>
-            <View className="justify-center items-center bg-white h-screen">
-                <Link href="/login" asChild>
-                    <TouchableOpacity className="bg-blue-500 px-6 py-3 rounded-full mt-4">
-                        <Text className="text-white font-bold text-center">
-                            Login Screen
-                        </Text>
-                    </TouchableOpacity>
-                </Link>
+export default function IndexScreen() {
+    const { isLoading, isAuthenticated, userRole } = useAuth();
 
-                <Link href="/forgot-pass" asChild>
-                    <TouchableOpacity className="bg-gray-500 px-6 py-3 rounded-full mt-4">
-                        <Text className="text-white font-bold text-center">
-                            Reset Pass
-                        </Text>
-                    </TouchableOpacity>
-                </Link>
-
-                <Link href="/first-time-login" asChild>
-                    <TouchableOpacity className="bg-gray-500 px-6 py-3 rounded-full mt-4">
-                        <Text className="text-white font-bold text-center">
-                            First Time Login
-                        </Text>
-                    </TouchableOpacity>
-                </Link>
-
-                <Link href="/home" asChild>
-                    <TouchableOpacity className="bg-gray-500 px-6 py-3 rounded-full mt-4">
-                        <Text className="text-white font-bold text-center">
-                            Home
-                        </Text>
-                    </TouchableOpacity>
-                </Link>
+    if (isLoading) {
+        return (
+            <View className="flex-1 justify-center items-center bg-white">
+                <ActivityIndicator size="large" color="#2563EB" />
             </View>
-        </SafeAreaView>
-    );
+        );
+    }
+
+    if (!isAuthenticated) {
+        return <Redirect href="/(auth)/login" />;
+    }
+
+    if (userRole === 'MANAGER') {
+        return <Redirect href="/(manager)/dashboard" />;
+    }
+
+    return <Redirect href="/(student)/home" />;
 }
