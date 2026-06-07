@@ -10,7 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import SectionCard from '@/components/SectionCard';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import ChatItem, { ChatProps } from '@/components/ChatItem';
 
 export interface ChatMessage {
@@ -212,6 +212,20 @@ const getChatPreview = (chat: ChatProps): ChatProps => {
 
 export const MOCK_CHATS: ChatProps[] = CHAT_LIST_BASE.map(getChatPreview);
 
+export const createStudentGroupChat = (name: string, memberNames: string[]) => {
+    const id = `student-group-${Date.now()}`;
+    MOCK_CHAT_MESSAGES[id] = [];
+    MOCK_CHATS.unshift({
+        id,
+        name,
+        lastMessage: `${memberNames.length + 1} members - Start the conversation`,
+        time: 'New',
+        unreadCount: 0,
+        type: 'group',
+    });
+    return id;
+};
+
 export default function ChatScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
@@ -220,6 +234,13 @@ export default function ChatScreen() {
     const [activeFilter, setActiveFilter] = useState<
         'All' | 'Roommate' | 'Manager' | 'Group' | 'Bot'
     >('All');
+    const [, refreshChats] = useState(0);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            refreshChats((value) => value + 1);
+        }, [])
+    );
 
     const filteredChats = MOCK_CHATS.filter((chat) => {
         const matchesSearch = chat.name
@@ -268,6 +289,13 @@ export default function ChatScreen() {
                             onChangeText={setSearchQuery}
                         />
                     </View>
+                    <TouchableOpacity
+                        activeOpacity={0.75}
+                        onPress={() => router.push('/chat/create-group')}
+                        className="w-12 h-12 rounded-xl bg-blue-600 items-center justify-center ml-1"
+                    >
+                        <Feather name="users" size={20} color="white" />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Filter */}

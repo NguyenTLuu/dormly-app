@@ -40,6 +40,8 @@ export interface TransferRoomRequest {
     requestedRoom: string;
     block: string;
     floor: string;
+    requestedBlock: string;
+    requestedFloor: string;
     status: WorkStatus;
     submittedAt: string;
     submittedTime: string;
@@ -63,6 +65,13 @@ export const floorsByBlock: Record<string, string[]> = {
     'Block C': ['All', 'Floor 1', 'Floor 2'],
 };
 export const priorityOptions = ['All', 'Urgent', 'Medium', 'Low'];
+export const issueTypeOptions = [
+    'All',
+    'Electric',
+    'Water',
+    'Internet',
+    'Facility',
+];
 
 export const handlerOptions = [
     'Unassigned',
@@ -168,7 +177,7 @@ export const issueRequests: WorkRequest[] = [
     {
         id: 'ISS-1031',
         title: 'Electrical outlet not working',
-        category: 'Electrical',
+        category: 'Electric',
         block: 'Block B',
         floor: 'Floor 1',
         room: 'B101',
@@ -213,7 +222,7 @@ export const issueRequests: WorkRequest[] = [
     {
         id: 'ISS-1027',
         title: 'Ceiling light flickering',
-        category: 'Electrical',
+        category: 'Electric',
         block: 'Block B',
         floor: 'Floor 3',
         room: 'B303',
@@ -312,7 +321,7 @@ export const complaintRequests: WorkRequest[] = [
         category: 'Noise',
         block: 'Block A',
         floor: 'Floor 2',
-        room: 'A202',
+        room: 'A205',
         status: 'Pending',
         priority: 'Medium',
         reportedBy: 'Hoang Linh',
@@ -337,7 +346,7 @@ export const complaintRequests: WorkRequest[] = [
         category: 'Security',
         block: 'Block C',
         floor: 'Floor 1',
-        room: 'C101',
+        room: 'C102',
         status: 'In Progress',
         priority: 'Urgent',
         reportedBy: 'Nguyen Van A',
@@ -535,6 +544,8 @@ export const transferRoomRequests: TransferRoomRequest[] = [
         requestedRoom: 'B201',
         block: 'Block A',
         floor: 'Floor 1',
+        requestedBlock: 'Block B',
+        requestedFloor: 'Floor 2',
         status: 'Pending',
         submittedAt: '05 Jun 2026',
         submittedTime: '05 Jun 2026, 10:25',
@@ -549,6 +560,8 @@ export const transferRoomRequests: TransferRoomRequest[] = [
         requestedRoom: 'A201',
         block: 'Block C',
         floor: 'Floor 1',
+        requestedBlock: 'Block A',
+        requestedFloor: 'Floor 2',
         status: 'In Progress',
         submittedAt: '04 Jun 2026',
         submittedTime: '04 Jun 2026, 13:50',
@@ -564,6 +577,8 @@ export const transferRoomRequests: TransferRoomRequest[] = [
         requestedRoom: 'C202',
         block: 'Block B',
         floor: 'Floor 2',
+        requestedBlock: 'Block C',
+        requestedFloor: 'Floor 2',
         status: 'Resolved',
         submittedAt: '31 May 2026',
         submittedTime: '31 May 2026, 11:05',
@@ -580,6 +595,8 @@ export const transferRoomRequests: TransferRoomRequest[] = [
         requestedRoom: 'B202',
         block: 'Block C',
         floor: 'Floor 2',
+        requestedBlock: 'Block B',
+        requestedFloor: 'Floor 2',
         status: 'Resolved',
         submittedAt: '29 May 2026',
         submittedTime: '29 May 2026, 15:45',
@@ -597,6 +614,8 @@ export const transferRoomRequests: TransferRoomRequest[] = [
         requestedRoom: 'C202',
         block: 'Block A',
         floor: 'Floor 3',
+        requestedBlock: 'Block C',
+        requestedFloor: 'Floor 2',
         status: 'Pending',
         submittedAt: '05 Jun 2026',
         submittedTime: '05 Jun 2026, 15:30',
@@ -611,6 +630,8 @@ export const transferRoomRequests: TransferRoomRequest[] = [
         requestedRoom: 'A205',
         block: 'Block B',
         floor: 'Floor 3',
+        requestedBlock: 'Block A',
+        requestedFloor: 'Floor 2',
         status: 'In Progress',
         submittedAt: '03 Jun 2026',
         submittedTime: '03 Jun 2026, 08:20',
@@ -626,6 +647,8 @@ export const transferRoomRequests: TransferRoomRequest[] = [
         requestedRoom: 'B104',
         block: 'Block C',
         floor: 'Floor 2',
+        requestedBlock: 'Block B',
+        requestedFloor: 'Floor 1',
         status: 'Resolved',
         submittedAt: '25 May 2026',
         submittedTime: '25 May 2026, 10:10',

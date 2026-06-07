@@ -1,3 +1,5 @@
+import { complaintRequests, issueRequests } from './manager-requests';
+
 export type RoomStatus = 'Occupied' | 'Vacant' | 'Issue';
 export type IncidentSeverity = 'Low' | 'Medium' | 'High' | 'Critical';
 export type IncidentStatus = 'Open' | 'In Progress' | 'Resolved';
@@ -32,6 +34,7 @@ export interface IncidentRecord {
 export interface ComplaintRecord {
     id: string;
     student: string;
+    room: string;
     category: string;
     priority: ComplaintPriority;
     status: ComplaintStatus;
@@ -181,7 +184,7 @@ export const managerIncidents: IncidentRecord[] = [
     {
         id: 'INC-1024',
         room: 'A102',
-        type: 'Electrical',
+        type: 'Electric',
         severity: 'High',
         status: 'In Progress',
         reportedAt: '04 Jun 2026',
@@ -208,7 +211,7 @@ export const managerIncidents: IncidentRecord[] = [
     {
         id: 'INC-1019',
         room: 'A201',
-        type: 'Furniture',
+        type: 'Facility',
         severity: 'Low',
         status: 'Resolved',
         reportedAt: '02 Jun 2026',
@@ -217,7 +220,7 @@ export const managerIncidents: IncidentRecord[] = [
     {
         id: 'INC-1018',
         room: 'B202',
-        type: 'Cleaning',
+        type: 'Facility',
         severity: 'Low',
         status: 'Resolved',
         reportedAt: '01 Jun 2026',
@@ -226,7 +229,7 @@ export const managerIncidents: IncidentRecord[] = [
     {
         id: 'INC-1015',
         room: 'A102',
-        type: 'Electrical',
+        type: 'Electric',
         severity: 'Medium',
         status: 'Resolved',
         reportedAt: '31 May 2026',
@@ -238,6 +241,7 @@ export const managerComplaints: ComplaintRecord[] = [
     {
         id: 'CP-2201',
         student: 'Nguyen Van A',
+        room: 'A202',
         category: 'Noise',
         priority: 'High',
         status: 'New',
@@ -247,6 +251,7 @@ export const managerComplaints: ComplaintRecord[] = [
     {
         id: 'CP-2198',
         student: 'Tran Phuoc',
+        room: 'C102',
         category: 'Security',
         priority: 'Medium',
         status: 'In Review',
@@ -256,6 +261,7 @@ export const managerComplaints: ComplaintRecord[] = [
     {
         id: 'CP-2196',
         student: 'Le Duc',
+        room: 'B201',
         category: 'Order',
         priority: 'Low',
         status: 'Resolved',
@@ -265,6 +271,7 @@ export const managerComplaints: ComplaintRecord[] = [
     {
         id: 'CP-2194',
         student: 'Pham Minh',
+        room: 'A101',
         category: 'Security',
         priority: 'High',
         status: 'In Review',
@@ -274,6 +281,7 @@ export const managerComplaints: ComplaintRecord[] = [
     {
         id: 'CP-2190',
         student: 'Hoang Linh',
+        room: 'C202',
         category: 'Prohibited Items',
         priority: 'Medium',
         status: 'Resolved',
@@ -335,13 +343,13 @@ export const managerReportSummaries: ReportSummary[] = [
     {
         id: 'issues',
         title: 'Issues',
-        value: `${managerIncidents.filter((incident) => incident.status !== 'Resolved').length} open`,
-        description: 'Electrical, water, internet, and facility issues',
+        value: `${issueRequests.filter((request) => request.status !== 'Resolved').length} open`,
+        description: 'Electric, water, internet, and facility issues',
     },
     {
         id: 'complaints',
         title: 'Complaints',
-        value: `${managerComplaints.filter((complaint) => complaint.status !== 'Resolved').length} open`,
+        value: `${complaintRequests.filter((request) => request.status !== 'Resolved').length} open`,
         description: 'Noise, order, security, and conduct complaints',
     },
     {
@@ -369,22 +377,39 @@ export const dashboardSummary = {
     fullRooms: roomOverviewStats.fullRooms,
     totalRooms: roomOverviewStats.totalRooms,
     currentStudents: roomOverviewStats.occupiedBeds,
-    openIssues: managerIncidents.filter(
-        (incident) => incident.status !== 'Resolved'
-    ).length,
-    openComplaints: managerComplaints.filter(
-        (complaint) => complaint.status !== 'Resolved'
+    openIssues: issueRequests.filter((request) => request.status !== 'Resolved')
+        .length,
+    openComplaints: complaintRequests.filter(
+        (request) => request.status !== 'Resolved'
     ).length,
     transferRequests: openTransferRequests.length,
 };
 
-export const openIssues = managerIncidents.filter(
-    (incident) => incident.status !== 'Resolved'
+export const openIssues = issueRequests.filter(
+    (request) => request.status !== 'Resolved'
 );
 
-export const openComplaints = managerComplaints.filter(
-    (complaint) => complaint.status !== 'Resolved'
+export const openComplaints = complaintRequests.filter(
+    (request) => request.status !== 'Resolved'
 );
+
+export const requestStatusSummary = {
+    issues: {
+        pending: issueRequests.filter((request) => request.status === 'Pending')
+            .length,
+        inProgress: issueRequests.filter(
+            (request) => request.status === 'In Progress'
+        ).length,
+    },
+    complaints: {
+        pending: complaintRequests.filter(
+            (request) => request.status === 'Pending'
+        ).length,
+        inProgress: complaintRequests.filter(
+            (request) => request.status === 'In Progress'
+        ).length,
+    },
+};
 
 const resolvedIssues = managerIncidents.filter(
     (incident) => incident.status === 'Resolved'
@@ -525,15 +550,12 @@ export const roomOccupancyByFloor = ['Floor 1', 'Floor 2'].map((floor) => {
 });
 
 export const incidentTypeBreakdown = [
-    'Electrical',
+    'Electric',
     'Water',
     'Internet',
-    'Furniture',
-    'Cleaning',
+    'Facility',
 ].map((type) => {
-    const count = openIssues.filter(
-        (incident) => incident.type === type
-    ).length;
+    const count = openIssues.filter((request) => request.category === type).length;
 
     return {
         label: type,
@@ -547,24 +569,17 @@ export const issueLocationBreakdown: BlockFloorSummary[] = [
     'Block B',
     'Block C',
 ].map((block) => {
-    const blockRooms = managerRooms.filter((room) => room.block === block);
-    const blockRoomIds = blockRooms.map((room) => room.id);
-    const blockIssues = openIssues.filter((incident) =>
-        blockRoomIds.includes(incident.room)
-    );
-    const floors = Array.from(new Set(blockRooms.map((room) => room.floor))).map(
+    const blockIssues = openIssues.filter((request) => request.block === block);
+    const floors = Array.from(new Set(blockIssues.map((request) => request.floor))).map(
         (floor) => {
-            const floorRoomIds = blockRooms
-                .filter((room) => room.floor === floor)
-                .map((room) => room.id);
-            const count = openIssues.filter((incident) =>
-                floorRoomIds.includes(incident.room)
+            const count = blockIssues.filter(
+                (request) => request.floor === floor
             ).length;
 
             return {
                 label: floor,
                 count,
-                total: floorRoomIds.length,
+                total: count,
             };
         }
     );
@@ -572,6 +587,37 @@ export const issueLocationBreakdown: BlockFloorSummary[] = [
     return {
         label: block,
         total: blockIssues.length,
+        floors,
+    };
+});
+
+export const complaintLocationBreakdown: BlockFloorSummary[] = [
+    'Block A',
+    'Block B',
+    'Block C',
+].map((block) => {
+    const blockComplaints = openComplaints.filter(
+        (request) => request.block === block
+    );
+    const floors = Array.from(
+        new Set(blockComplaints.map((request) => request.floor))
+    ).map(
+        (floor) => {
+            const count = blockComplaints.filter(
+                (request) => request.floor === floor
+            ).length;
+
+            return {
+                label: floor,
+                count,
+                total: count,
+            };
+        }
+    );
+
+    return {
+        label: block,
+        total: blockComplaints.length,
         floors,
     };
 });
@@ -593,10 +639,10 @@ export const incidentSeverityBreakdown = [
     };
 });
 
-export const feedbackStatusBreakdown = ['New', 'In Review'].map(
+export const feedbackStatusBreakdown = ['Pending', 'In Progress'].map(
     (status) => {
         const count = openComplaints.filter(
-            (feedback) => feedback.status === status
+            (request) => request.status === status
         ).length;
 
         return {
@@ -614,7 +660,7 @@ export const feedbackCategoryBreakdown = [
     'Prohibited Items',
 ].map((category) => {
     const count = openComplaints.filter(
-        (feedback) => feedback.category === category
+        (request) => request.category === category
     ).length;
 
     return {

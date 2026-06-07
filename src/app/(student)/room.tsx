@@ -10,22 +10,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionCard from '@/components/SectionCard';
 import { Image } from 'expo-image';
 
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import Foundation from '@expo/vector-icons/Foundation';
-import Feather from '@expo/vector-icons/Feather';
-import FunctionButton from '@/components/FunctionButton';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import ActionRow from '@/components/ActionRow';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import StatusBadge from '@/components/StatusBadge';
 import Octicons from '@expo/vector-icons/Octicons';
 import RoomHistoryItem from '@/components/RoomHistoryItem';
 import RoommateItem from '@/components/RoommateItem';
+import { useRouter } from 'expo-router';
+import { StudentIssueType, studentIssueTypes } from '@/data/student-requests';
+
+const issueTypeStyles: Record<
+    StudentIssueType,
+    { icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }
+> = {
+    Electric: { icon: 'flash-outline', color: '#D97706', bg: '#FEF3C7' },
+    Water: { icon: 'water-outline', color: '#0284C7', bg: '#E0F2FE' },
+    Internet: { icon: 'wifi-outline', color: '#2563EB', bg: '#DBEAFE' },
+    Facility: { icon: 'build-outline', color: '#EA580C', bg: '#FFEDD5' },
+};
 
 export default function RoomScreen() {
     const insets = useSafeAreaInsets();
+    const router = useRouter();
     return (
         <>
             <StatusBar
@@ -67,11 +75,19 @@ export default function RoomScreen() {
                                     1
                                 </Text>
                             </View>
-                            <View className="self-center justify-center items-center flex-row border border-blue-500 px-3 py-1 rounded-xl">
+                            <TouchableOpacity
+                                activeOpacity={0.75}
+                                onPress={() =>
+                                    router.push(
+                                        '/student-request-details/contract'
+                                    )
+                                }
+                                className="self-center justify-center items-center flex-row border border-blue-500 px-3 py-2 rounded-xl"
+                            >
                                 <Text className="text-blue-600 font-semibold text-base">
                                     View Contract
                                 </Text>
-                            </View>
+                            </TouchableOpacity>
                         </View>
                     </View>
                     <View className="flex-row pt-4">
@@ -124,121 +140,119 @@ export default function RoomScreen() {
 
                 <SectionCard className="mx-4 mt-4">
                     <View className="flex-row items-center">
-                        <View className="rounded-full w-8 h-8 bg-blue-50 justify-center items-center">
-                            <Feather
-                                name="alert-triangle"
-                                size={18}
-                                color="#2365E7"
+                        <View className="rounded-xl w-10 h-10 bg-orange-100 justify-center items-center">
+                            <Ionicons
+                                name="construct-outline"
+                                size={20}
+                                color="#EA580C"
                             />
                         </View>
-                        <Text className="font-bold ml-2">Report Issue</Text>
+                        <View className="ml-3 flex-1">
+                            <Text className="font-bold text-[#1E293B]">
+                                Report an issue
+                            </Text>
+                            <Text className="text-[#64748B] text-xs font-medium mt-0.5">
+                                Choose a type to start a detailed report.
+                            </Text>
+                        </View>
                     </View>
-                    <View className="flex-row justify-between mt-2">
-                        <FunctionButton
-                            label={'Electrical'}
-                            className="w-[23%] "
-                        >
-                            <AntDesign
-                                name="thunderbolt"
-                                size={20}
-                                color="#2365E7"
-                            />
-                        </FunctionButton>
-                        <FunctionButton label={'Water'} className="w-[23%]">
-                            <Ionicons
-                                name="water-sharp"
-                                size={24}
-                                color="#2365E7"
-                            />
-                        </FunctionButton>
-                        <FunctionButton label={'Internet'} className="w-[23%]">
-                            <FontAwesome5
-                                name="wifi"
-                                size={20}
-                                color="#2365E7"
-                            />
-                        </FunctionButton>
-                        <FunctionButton label={'Noise'} className="w-[23%]">
-                            <Ionicons
-                                name="volume-medium-sharp"
-                                size={28}
-                                color="#2365E7"
-                            />
-                        </FunctionButton>
+                    <View className="flex-row flex-wrap justify-between mt-4">
+                        {studentIssueTypes.map((type) => {
+                            const style = issueTypeStyles[type];
+                            return (
+                                <TouchableOpacity
+                                    key={type}
+                                    activeOpacity={0.75}
+                                    onPress={() =>
+                                        router.push({
+                                            pathname:
+                                                '/student-request-details/issue',
+                                            params: { type },
+                                        })
+                                    }
+                                    className="w-[48%] rounded-2xl border border-slate-100 p-3 mb-3 flex-row items-center"
+                                >
+                                    <View
+                                        className="w-10 h-10 rounded-xl items-center justify-center"
+                                        style={{ backgroundColor: style.bg }}
+                                    >
+                                        <Ionicons
+                                            name={style.icon}
+                                            size={20}
+                                            color={style.color}
+                                        />
+                                    </View>
+                                    <Text className="text-[#475569] text-sm font-bold ml-2 flex-1">
+                                        {type}
+                                    </Text>
+                                    <Ionicons
+                                        name="chevron-forward"
+                                        size={16}
+                                        color="#CBD5E1"
+                                    />
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
-                    <View className="border border-gray-100 mt-3.5" />
-                    <ActionRow
-                        label={'Other Issues'}
-                        isLast={true}
-                        textColor={'#2566E2'}
-                    />
                 </SectionCard>
 
-                <SectionCard className="mx-4 mt-4">
-                    <View className="flex-row items-center">
-                        <View className="rounded-full w-8 h-8 bg-blue-50 justify-center items-center">
-                            <FontAwesome6
-                                name="message"
-                                size={16}
-                                color="#2365E7"
-                            />
-                        </View>
-                        <Text className="font-bold ml-2">Complaint Center</Text>
-                    </View>
-                    <View className="border border-gray-200 rounded-xl bg-gray-100 mt-2 flex-row p-4 items-center ">
+                <TouchableOpacity
+                    activeOpacity={0.75}
+                    onPress={() =>
+                        router.push('/student-request-details/complaint')
+                    }
+                    className="mx-4 mt-4 bg-white rounded-2xl p-4 border border-purple-100 shadow-xl flex-row items-center"
+                >
+                    <View className="rounded-2xl w-12 h-12 bg-purple-100 justify-center items-center">
                         <Ionicons
-                            name="document-text-outline"
-                            size={36}
-                            color="gray"
+                            name="chatbox-ellipses-outline"
+                            size={22}
+                            color="#7C3AED"
                         />
-                        <View className="ml-2">
-                            <Text className="font-medium text-gray-700">
-                                No active complaints
-                            </Text>
-                            <Text className="font-medium text-gray-500 mt-1 text-sm">
-                                You have no open complaints
-                            </Text>
-                        </View>
                     </View>
-                    <View className="border border-gray-100 mt-3.5" />
-
-                    <ActionRow
-                        label={'View Complaint History'}
-                        isLast={true}
-                        textColor={'#2566E2'}
-                    />
-                </SectionCard>
-
-                <SectionCard className="mx-4 mt-4">
-                    <View className="flex-row items-center">
-                        <View className="rounded-full w-8 h-8 bg-blue-50 justify-center items-center">
-                            <MaterialCommunityIcons
-                                name="swap-horizontal"
-                                size={24}
-                                color="#2365E7"
-                            />
-                        </View>
-                        <Text className="font-bold mx-2">Transfer Request</Text>
-                        <StatusBadge text={'Pending'} type={'warning'} />
-                    </View>
-                    <View className="mt-2">
-                        <Text className="font-medium text-gray-500">
-                            Reason
+                    <View className="ml-3 flex-1">
+                        <Text className="font-bold text-[#1E293B]">
+                            Create a complaint
                         </Text>
-                        <View className="border border-gray-200 rounded-xl bg-gray-100 mt-2 flex-row p-4 items-center">
-                            <Text className="text-gray-500">
-                                Need to move closer to classmates for group
-                                study
-                            </Text>
-                        </View>
-                        <View className="border border-gray-100 mt-3.5" />
+                        <Text className="text-[#64748B] text-xs font-medium mt-1">
+                            Describe your concern and attach supporting files.
+                        </Text>
                     </View>
-                    <ActionRow
-                        label={'Edit Request'}
-                        isLast={true}
-                        textColor={'#2566E2'}
+                    <Ionicons
+                        name="arrow-forward-circle"
+                        size={27}
+                        color="#7C3AED"
                     />
-                </SectionCard>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    activeOpacity={0.75}
+                    onPress={() =>
+                        router.push('/student-request-details/transfer')
+                    }
+                    className="mx-4 mt-4 bg-white rounded-2xl p-4 border border-blue-100 shadow-xl flex-row items-center"
+                >
+                    <View className="rounded-2xl w-12 h-12 bg-blue-100 justify-center items-center">
+                        <Ionicons
+                            name="swap-horizontal"
+                            size={23}
+                            color="#2563EB"
+                        />
+                    </View>
+                    <View className="ml-3 flex-1">
+                        <Text className="font-bold text-[#1E293B]">
+                            Request room transfer
+                        </Text>
+                        <Text className="text-[#64748B] text-xs font-medium mt-1">
+                            Browse available rooms by block and floor.
+                        </Text>
+                    </View>
+                    <Ionicons
+                        name="arrow-forward-circle"
+                        size={27}
+                        color="#2563EB"
+                    />
+                </TouchableOpacity>
 
                 <SectionCard className="mx-4 mt-4">
                     <View className="flex-row items-center">

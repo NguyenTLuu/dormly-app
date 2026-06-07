@@ -3,24 +3,24 @@ import {
     RequestFilterBar,
     RequestTopTabs,
     StatusTabs,
+    IssueTypeFilter,
+    TransferFilterBar,
     TransferRequestCard,
-    TransferRequestDetailModal,
     WorkRequestCard,
-    WorkRequestDetailModal,
 } from '@/components/manager-requests';
 import {
     RequestTab,
-    TransferRoomRequest,
-    WorkRequest,
     WorkStatus,
     blockOptions,
     complaintRequests,
     floorsByBlock,
     issueRequests,
+    issueTypeOptions,
     priorityOptions,
     statusTabs,
     transferRoomRequests,
 } from '@/data/manager-requests';
+import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StatusBar, Text, View } from 'react-native';
 
@@ -41,31 +41,18 @@ const getStatusCounts = <T extends { status: WorkStatus }>(
 };
 
 export default function RequestScreen() {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<RequestTab>('issues');
     const [activeStatus, setActiveStatus] = useState<WorkStatus>('Pending');
     const [selectedBlock, setSelectedBlock] = useState('All');
     const [selectedFloor, setSelectedFloor] = useState('All');
     const [selectedPriority, setSelectedPriority] = useState('All');
-    const [issues, setIssues] = useState<WorkRequest[]>(issueRequests);
-    const [complaints, setComplaints] =
-        useState<WorkRequest[]>(complaintRequests);
-    const [transfers, setTransfers] =
-        useState<TransferRoomRequest[]>(transferRoomRequests);
-    const [selectedWorkId, setSelectedWorkId] = useState<string | null>(null);
-    const [selectedTransferId, setSelectedTransferId] = useState<string | null>(
-        null
-    );
-
-    const activeWorkItems = activeTab === 'issues' ? issues : complaints;
+    const [selectedIssueType, setSelectedIssueType] = useState('All');
+    const activeWorkItems =
+        activeTab === 'issues' ? issueRequests : complaintRequests;
+    const transfers = transferRoomRequests;
     const availableFloorOptions =
         selectedBlock === 'All' ? ['All'] : floorsByBlock[selectedBlock];
-    const selectedWorkItem =
-        activeTab === 'transfers'
-            ? null
-            : activeWorkItems.find((item) => item.id === selectedWorkId) ||
-              null;
-    const selectedTransferItem =
-        transfers.find((item) => item.id === selectedTransferId) || null;
 
     const filteredWorkItems = useMemo(() => {
         return activeWorkItems.filter((item) => {
@@ -77,20 +64,57 @@ export default function RequestScreen() {
             const matchesPriority =
                 selectedPriority === 'All' ||
                 item.priority === selectedPriority;
+            const matchesIssueType =
+                activeTab !== 'issues' ||
+                selectedIssueType === 'All' ||
+                item.category === selectedIssueType;
 
             return (
-                matchesStatus && matchesBlock && matchesFloor && matchesPriority
+                matchesStatus &&
+                matchesBlock &&
+                matchesFloor &&
+                matchesPriority &&
+                matchesIssueType
             );
         });
-    }, [activeStatus, selectedBlock, selectedFloor, selectedPriority]);
+    }, [
+        activeStatus,
+        activeTab,
+        activeWorkItems,
+        selectedBlock,
+        selectedFloor,
+        selectedPriority,
+        selectedIssueType,
+    ]);
 
     const filteredTransferItems = useMemo(() => {
-        return transfers.filter((item) => item.status === activeStatus);
-    }, [activeStatus, transfers]);
+        return transfers.filter((item) => {
+            const matchesStatus = item.status === activeStatus;
+            const matchesBlock =
+                selectedBlock === 'All' ||
+                item.requestedBlock === selectedBlock;
+            const matchesFloor =
+                selectedFloor === 'All' ||
+                item.requestedFloor === selectedFloor;
+
+            return matchesStatus && matchesBlock && matchesFloor;
+        });
+    }, [activeStatus, selectedBlock, selectedFloor, transfers]);
 
     const statusCounts = useMemo(() => {
         if (activeTab === 'transfers') {
-            return getStatusCounts(transfers);
+            const filteredByRequestedLocation = transfers.filter((item) => {
+                const matchesBlock =
+                    selectedBlock === 'All' ||
+                    item.requestedBlock === selectedBlock;
+                const matchesFloor =
+                    selectedFloor === 'All' ||
+                    item.requestedFloor === selectedFloor;
+
+                return matchesBlock && matchesFloor;
+            });
+
+            return getStatusCounts(filteredByRequestedLocation);
         }
 
         const filteredByLocation = activeWorkItems.filter((item) => {
@@ -101,86 +125,29 @@ export default function RequestScreen() {
             const matchesPriority =
                 selectedPriority === 'All' ||
                 item.priority === selectedPriority;
+            const matchesIssueType =
+                activeTab !== 'issues' ||
+                selectedIssueType === 'All' ||
+                item.category === selectedIssueType;
 
-            return matchesBlock && matchesFloor && matchesPriority;
+            return (
+                matchesBlock &&
+                matchesFloor &&
+                matchesPriority &&
+                matchesIssueType
+            );
         });
 
         return getStatusCounts(filteredByLocation);
-    }, [activeTab, selectedBlock, selectedFloor, selectedPriority, transfers]);
-
-    const updateWorkItems = (
-        updater: (items: WorkRequest[]) => WorkRequest[]
-    ) => {
-        if (activeTab === 'issues') {
-            setIssues(updater);
-        } else if (activeTab === 'complaints') {
-            setComplaints(updater);
-        }
-    };
-
-    const handleAssign = (id: string, assignee: string) => {
-        updateWorkItems((items) =>
-            items.map((item) =>
-                item.id === id
-                    ? { ...item, assignee: assignee || undefined }
-                    : item
-            )
-        );
-    };
-
-    const handleProgressChange = (id: string, progress: string) => {
-        updateWorkItems((items) =>
-            items.map((item) => {
-                if (item.id !== id) {
-                    return item;
-                }
-
-                return {
-                    ...item,
-                    progress,
-                    status: progress as WorkStatus,
-                };
-            })
-        );
-    };
-
-    const handleNoteChange = (id: string, note: string) => {
-        updateWorkItems((items) =>
-            items.map((item) => (item.id === id ? { ...item, note } : item))
-        );
-    };
-
-    const handleApproveTransfer = (id: string) => {
-        setTransfers((items) =>
-            items.map((item) =>
-                item.id === id
-                    ? {
-                          ...item,
-                          status: 'Resolved',
-                          decision: 'Approved',
-                          denialReason: undefined,
-                          note: 'Approved by manager.',
-                      }
-                    : item
-            )
-        );
-    };
-
-    const handleDenyTransfer = (id: string, reason: string) => {
-        setTransfers((items) =>
-            items.map((item) =>
-                item.id === id
-                    ? {
-                          ...item,
-                          status: 'Resolved',
-                          decision: 'Denied',
-                          denialReason: reason,
-                          note: reason,
-                      }
-                    : item
-            )
-        );
-    };
+    }, [
+        activeTab,
+        activeWorkItems,
+        selectedBlock,
+        selectedFloor,
+        selectedPriority,
+        selectedIssueType,
+        transfers,
+    ]);
 
     const handleTabChange = (tab: RequestTab) => {
         setActiveTab(tab);
@@ -188,8 +155,7 @@ export default function RequestScreen() {
         setSelectedBlock('All');
         setSelectedFloor('All');
         setSelectedPriority('All');
-        setSelectedWorkId(null);
-        setSelectedTransferId(null);
+        setSelectedIssueType('All');
     };
 
     const handleBlockChange = (block: string) => {
@@ -244,11 +210,31 @@ export default function RequestScreen() {
                         />
                     )}
 
+                    {activeTab === 'transfers' && (
+                        <TransferFilterBar
+                            blocks={blockOptions}
+                            floors={availableFloorOptions}
+                            selectedBlock={selectedBlock}
+                            selectedFloor={selectedFloor}
+                            onBlockChange={handleBlockChange}
+                            onFloorChange={setSelectedFloor}
+                            onClear={handleClearFilter}
+                        />
+                    )}
+
                     <StatusTabs
                         activeStatus={activeStatus}
                         counts={statusCounts}
                         onChange={setActiveStatus}
                     />
+
+                    {activeTab === 'issues' && (
+                        <IssueTypeFilter
+                            options={issueTypeOptions}
+                            selectedType={selectedIssueType}
+                            onChange={setSelectedIssueType}
+                        />
+                    )}
 
                     <View>
                         <Text className="text-[#1E293B] text-lg font-bold mb-3">
@@ -261,7 +247,14 @@ export default function RequestScreen() {
                                           key={item.id}
                                           item={item}
                                           onPress={(request) =>
-                                              setSelectedTransferId(request.id)
+                                              router.push({
+                                                  pathname:
+                                                      '/manager-details/ticket/[type]/[id]',
+                                                  params: {
+                                                      type: 'transfer',
+                                                      id: request.id,
+                                                  },
+                                              })
                                           }
                                       />
                                   ))
@@ -270,7 +263,18 @@ export default function RequestScreen() {
                                           key={item.id}
                                           item={item}
                                           onPress={(request) =>
-                                              setSelectedWorkId(request.id)
+                                              router.push({
+                                                  pathname:
+                                                      '/manager-details/ticket/[type]/[id]',
+                                                  params: {
+                                                      type:
+                                                          activeTab ===
+                                                          'complaints'
+                                                              ? 'complaint'
+                                                              : 'issue',
+                                                      id: request.id,
+                                                  },
+                                              })
                                           }
                                       />
                                   ))}
@@ -290,21 +294,6 @@ export default function RequestScreen() {
                 </View>
             </ScrollView>
 
-            <WorkRequestDetailModal
-                visible={Boolean(selectedWorkItem)}
-                item={selectedWorkItem}
-                onClose={() => setSelectedWorkId(null)}
-                onAssign={handleAssign}
-                onProgressChange={handleProgressChange}
-                onNoteChange={handleNoteChange}
-            />
-            <TransferRequestDetailModal
-                visible={Boolean(selectedTransferItem)}
-                item={selectedTransferItem}
-                onClose={() => setSelectedTransferId(null)}
-                onApprove={handleApproveTransfer}
-                onDeny={handleDenyTransfer}
-            />
         </>
     );
 }

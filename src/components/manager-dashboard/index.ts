@@ -4,5 +4,6 @@ export { default as InfoListRow } from './InfoListRow';
 export { default as ManagerHeader } from './ManagerHeader';
 export { default as MetricTile } from './MetricTile';
 export { default as ProgressRow } from './ProgressRow';
+export { default as RequestStatusSummary } from './RequestStatusSummary';
 export { default as SectionTitle } from './SectionTitle';
 export { default as TinyBadge } from './TinyBadge';

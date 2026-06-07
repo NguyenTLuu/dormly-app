@@ -10,12 +10,32 @@ import {
     dashboardSummary,
     issueAverageRating,
     managerReportSummaries,
+    requestStatusSummary,
     roomOverviewStats,
 } from '@/data/manager-dashboard';
-import React from 'react';
-import { ScrollView, StatusBar, Text, View } from 'react-native';
+import { dashboardActionSummary } from '@/data/manager-dashboard-actions';
+import { managerUnreadNotificationCount } from '@/data/manager-app-notifications';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import {
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 export default function Dashboard() {
+    const router = useRouter();
+    const [, refreshNotifications] = useState(0);
+
+    useFocusEffect(
+        useCallback(() => {
+            refreshNotifications((value) => value + 1);
+        }, [])
+    );
+
     return (
         <>
             <StatusBar
@@ -27,6 +47,28 @@ export default function Dashboard() {
                 <ManagerHeader
                     title="Dashboard"
                     subtitle="Dormitory overview and operational signals"
+                    rightAction={
+                        <TouchableOpacity
+                            activeOpacity={0.75}
+                            onPress={() =>
+                                router.push(
+                                    '/manager-dashboard-details/notification-inbox'
+                                )
+                            }
+                            className="w-11 h-11 rounded-full bg-white/20 items-center justify-center ml-3"
+                        >
+                            <Ionicons
+                                name="notifications-outline"
+                                size={22}
+                                color="white"
+                            />
+                            <View className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 items-center justify-center">
+                                <Text className="text-white text-[8px] font-bold">
+                                    {managerUnreadNotificationCount()}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    }
                 />
 
                 <View className="-mt-8 px-4 pb-8">
@@ -57,7 +99,7 @@ export default function Dashboard() {
                                 compact
                                 label="Issues"
                                 value={`${dashboardSummary.openIssues}`}
-                                caption="Open facility"
+                                caption={`${requestStatusSummary.issues.pending} pending / ${requestStatusSummary.issues.inProgress} active`}
                                 icon="warning-outline"
                                 color="#F97316"
                                 bgColor="#FFEDD5"
@@ -67,7 +109,7 @@ export default function Dashboard() {
                                 compact
                                 label="Complaints"
                                 value={`${dashboardSummary.openComplaints}`}
-                                caption="Open conduct"
+                                caption={`${requestStatusSummary.complaints.pending} pending / ${requestStatusSummary.complaints.inProgress} active`}
                                 icon="chatbox-ellipses-outline"
                                 color="#A855F7"
                                 bgColor="#F3E8FF"
@@ -132,10 +174,10 @@ export default function Dashboard() {
                         <DetailLinkCard
                             href="/manager-dashboard-details/issue-complaint-stats"
                             title="Issue and complaint stats"
-                            subtitle="View open issues and complaint signals"
+                            subtitle="Pending, in progress, type, and location"
                             icon="construct-outline"
                             accentColor="#F97316"
-                            rightText={`${dashboardSummary.openIssues + dashboardSummary.openComplaints}`}
+                            rightText={`${requestStatusSummary.issues.pending + requestStatusSummary.complaints.pending} pending`}
                         />
                         <DetailLinkCard
                             href="/manager-dashboard-details/report-summary"
@@ -144,6 +186,29 @@ export default function Dashboard() {
                             icon="document-text-outline"
                             accentColor="#22C55E"
                             rightText="Export"
+                        />
+                    </SectionCard>
+
+                    <SectionCard className="mt-4">
+                        <SectionTitle
+                            title="Administration"
+                            icon="shield-checkmark-outline"
+                        />
+                        <DetailLinkCard
+                            href="/manager-dashboard-details/notifications"
+                            title="Notifications"
+                            subtitle="Create and manage resident announcements"
+                            icon="notifications-outline"
+                            accentColor="#0EA5E9"
+                            rightText={`${dashboardActionSummary.draftNotifications + dashboardActionSummary.scheduledNotifications} active`}
+                        />
+                        <DetailLinkCard
+                            href="/manager-dashboard-details/account-requests"
+                            title="New account requests"
+                            subtitle="Approve or reject pending registrations"
+                            icon="person-add-outline"
+                            accentColor="#7C3AED"
+                            rightText={`${dashboardActionSummary.pendingAccounts} pending`}
                         />
                     </SectionCard>
 

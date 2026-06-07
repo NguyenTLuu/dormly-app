@@ -13,6 +13,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { dormFaq, findDormFaqAnswer } from '@/data/dorm-faq';
 
 interface MessageProps {
     id: string;
@@ -44,6 +45,8 @@ const BOT_QUICK_REPLIES = [
         answer: 'The Internet (Wi-Fi) fee is 100,000 VND / month / room (unlimited data package).',
     },
 ];
+
+void BOT_QUICK_REPLIES;
 
 export default function BotRoomScreen() {
     const router = useRouter();
@@ -104,11 +107,14 @@ export default function BotRoomScreen() {
         setTimeout(() => scrollToBottom(true), 100);
 
         setTimeout(() => {
+            const answer = findDormFaqAnswer(newMessage.text);
             setChatData((prev) => [
                 ...prev,
                 {
                     id: (Date.now() + 1).toString(),
-                    text: "I'm sorry, I couldn't understand your request. Please select one of the suggested questions below.",
+                    text:
+                        answer ??
+                        "I'm sorry, I couldn't find that information. Please select one of the suggested questions below.",
                     time: 'Just now',
                     isMe: false,
                 },
@@ -232,9 +238,9 @@ export default function BotRoomScreen() {
                         className="px-4"
                         contentContainerStyle={{ paddingRight: 30 }}
                     >
-                        {BOT_QUICK_REPLIES.map((reply, index) => (
+                        {dormFaq.map((reply) => (
                             <TouchableOpacity
-                                key={index}
+                                key={reply.id}
                                 onPress={() =>
                                     handleAskBot(reply.question, reply.answer)
                                 }

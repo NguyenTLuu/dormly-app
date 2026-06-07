@@ -59,11 +59,11 @@ export default function ManagerTabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="profile"
+                name="settings"
                 options={{
-                    title: 'Profile',
+                    title: 'Settings',
                     tabBarIcon: ({ color }) => (
-                        <Ionicons name="person" size={24} color={color} />
+                        <Ionicons name="settings" size={24} color={color} />
                     ),
                 }}
             />

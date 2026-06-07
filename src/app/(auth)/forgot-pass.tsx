@@ -1,10 +1,11 @@
 import { ScreenWrapper } from '@/components/ScreenWrapper';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import LogoImage from '@/components/LogoImage';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
+import { toast } from 'sonner-native';
 
 export default function ResetPassScreen() {
     const router = useRouter();
@@ -21,7 +22,9 @@ export default function ResetPassScreen() {
 
     const handleSubmitStep1 = () => {
         if (!email.trim()) {
-            Alert.alert('Error', 'Please enter your email or ID.');
+            toast.error('Error', {
+                description: 'Please enter your email or ID.',
+            });
             return;
         }
         setStep(2);
@@ -29,27 +32,31 @@ export default function ResetPassScreen() {
 
     const handleSubmitStep2 = () => {
         if (!otp.trim()) {
-            Alert.alert('Error', 'Please enter the verification code.');
+            toast.error('Error', {
+                description: 'Please enter the verification code.',
+            });
             return;
         }
         if (otp === '123456') {
             setStep(3);
         } else {
-            Alert.alert('Error', 'Invalid verification code. Try 123456');
+            toast.error('Error', {
+                description: 'Invalid verification code. Try 123456',
+            });
         }
     };
 
     const handleSubmitStep3 = () => {
         if (!newPassword || newPassword !== confirmPassword) {
-            Alert.alert('Error', 'Passwords do not match or are empty.');
+            toast.error('Error', {
+                description: 'Passwords do not match or are empty.',
+            });
             return;
         }
-        Alert.alert('Success', 'Your password has been reset successfully!', [
-            {
-                text: 'Back to Login',
-                onPress: () => router.replace('/login'),
-            },
-        ]);
+        toast.success('Success', {
+            description: 'Your password has been reset successfully.',
+        });
+        router.replace('/login');
     };
 
     const getStepCircleStyle = (stepNumber: number) => {

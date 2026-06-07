@@ -2,18 +2,19 @@ import {
     ManagerHeader,
     MetricTile,
     ProgressRow,
+    RequestStatusSummary,
     SectionTitle,
 } from '@/components/manager-dashboard';
 import SectionCard from '@/components/SectionCard';
 import {
     complaintAverageRating,
-    feedbackCategoryBreakdown,
-    feedbackStatusBreakdown,
+    complaintLocationBreakdown,
     incidentTypeBreakdown,
     issueAverageRating,
+    issueLocationBreakdown,
     openComplaints,
     openIssues,
-    issueLocationBreakdown,
+    requestStatusSummary,
 } from '@/data/manager-dashboard';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -35,6 +36,7 @@ interface ExpandableLocationProps {
         total: number;
     }[];
     isLast?: boolean;
+    itemLabel: string;
 }
 
 function ExpandableLocation({
@@ -42,6 +44,7 @@ function ExpandableLocation({
     total,
     floors,
     isLast = false,
+    itemLabel,
 }: ExpandableLocationProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -58,7 +61,7 @@ function ExpandableLocation({
                             {label}
                         </Text>
                         <Text className="text-[#64748B] text-xs font-medium mt-1">
-                            {total} open issues reported
+                            {total} open {itemLabel} reported
                         </Text>
                     </View>
                     <Ionicons
@@ -129,6 +132,37 @@ export default function IssueComplaintStatsScreen() {
 
                     <SectionCard className="mt-4">
                         <SectionTitle
+                            title="Open Request Status"
+                            icon="pulse-outline"
+                        />
+                        <View className="flex-row gap-3">
+                            <RequestStatusSummary
+                                title="Issues"
+                                icon="construct-outline"
+                                color="#F97316"
+                                backgroundColor="#FFEDD5"
+                                pending={requestStatusSummary.issues.pending}
+                                inProgress={
+                                    requestStatusSummary.issues.inProgress
+                                }
+                            />
+                            <RequestStatusSummary
+                                title="Complaints"
+                                icon="chatbox-ellipses-outline"
+                                color="#A855F7"
+                                backgroundColor="#F3E8FF"
+                                pending={
+                                    requestStatusSummary.complaints.pending
+                                }
+                                inProgress={
+                                    requestStatusSummary.complaints.inProgress
+                                }
+                            />
+                        </View>
+                    </SectionCard>
+
+                    <SectionCard className="mt-4">
+                        <SectionTitle
                             title="Resolved Ratings"
                             icon="star-outline"
                         />
@@ -173,6 +207,7 @@ export default function IssueComplaintStatsScreen() {
                                 label={location.label}
                                 total={location.total}
                                 floors={location.floors}
+                                itemLabel="issues"
                                 isLast={
                                     index === issueLocationBreakdown.length - 1
                                 }
@@ -182,26 +217,20 @@ export default function IssueComplaintStatsScreen() {
 
                     <SectionCard className="mt-4">
                         <SectionTitle
-                            title="Open Complaint Signals"
-                            icon="albums-outline"
+                            title="Open Complaints by Location"
+                            icon="location-outline"
                         />
-                        {feedbackStatusBreakdown.map((item) => (
-                            <ProgressRow
-                                key={item.label}
-                                label={item.label}
-                                value={item.value}
-                                percent={item.percent}
-                                color="#A855F7"
-                            />
-                        ))}
-                        <View className="border border-gray-100 my-3" />
-                        {feedbackCategoryBreakdown.map((item) => (
-                            <ProgressRow
-                                key={item.label}
-                                label={item.label}
-                                value={item.value}
-                                percent={item.percent}
-                                color="#2365E7"
+                        {complaintLocationBreakdown.map((location, index) => (
+                            <ExpandableLocation
+                                key={location.label}
+                                label={location.label}
+                                total={location.total}
+                                floors={location.floors}
+                                itemLabel="complaints"
+                                isLast={
+                                    index ===
+                                    complaintLocationBreakdown.length - 1
+                                }
                             />
                         ))}
                     </SectionCard>

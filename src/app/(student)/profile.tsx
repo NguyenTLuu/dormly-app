@@ -3,11 +3,7 @@ import {
     Text,
     StatusBar,
     TouchableOpacity,
-    Animated,
-    TextInput,
-    Platform,
-    KeyboardAvoidingView,
-    Modal,
+    ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
@@ -22,13 +18,14 @@ import Entypo from '@expo/vector-icons/Entypo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import SectionCard from '@/components/SectionCard';
 import InfoRow from '@/components/InfoRow';
-import * as assert from 'node:assert';
 import ActionRow from '@/components/ActionRow';
 import StatusBadge from '@/components/StatusBadge';
-import ScrollView = Animated.ScrollView;
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { Link, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import {
+    StudentProfileEditModal,
+    StudentProfileForm,
+} from '@/components/student-profile';
 
 export default function ProfileScreen() {
     const router = useRouter();
@@ -37,8 +34,7 @@ export default function ProfileScreen() {
         router.replace('/login');
     };
 
-    // 1. Khởi tạo Mock Data
-    const [profileData, setProfileData] = useState({
+    const [profileData, setProfileData] = useState<StudentProfileForm>({
         fullName: 'Nguyen Van A',
         studentId: '2231200123',
         email: 'a.nguyenvan.cit22@eiu.edu.vn',
@@ -47,18 +43,16 @@ export default function ProfileScreen() {
         major: 'Software Engineer',
     });
 
-    // 2. State quản lý Modal và form tạm thời khi edit
     const [isEditModalVisible, setEditModalVisible] = useState(false);
     const [editForm, setEditForm] = useState(profileData);
 
-    // 3. Hàm xử lý mở Modal và Lưu dữ liệu
     const handleOpenEdit = () => {
-        setEditForm(profileData); // Copy dữ liệu hiện tại vào form
+        setEditForm(profileData);
         setEditModalVisible(true);
     };
 
     const handleSave = () => {
-        setProfileData(editForm); // Cập nhật dữ liệu mới
+        setProfileData(editForm);
         setEditModalVisible(false);
     };
     return (
@@ -189,6 +183,11 @@ export default function ProfileScreen() {
                     <View className="px-2">
                         <ActionRow
                             label={'Citizen ID'}
+                            onPress={() =>
+                                router.push(
+                                    '/student-profile-details/documents'
+                                )
+                            }
                             rightElement={
                                 <StatusBadge text="Uploaded" type="success" />
                             }
@@ -201,6 +200,11 @@ export default function ProfileScreen() {
                         </ActionRow>
                         <ActionRow
                             label={'Temporary Residence'}
+                            onPress={() =>
+                                router.push(
+                                    '/student-profile-details/documents'
+                                )
+                            }
                             rightElement={
                                 <StatusBadge text="Uploaded" type="success" />
                             }
@@ -218,7 +222,14 @@ export default function ProfileScreen() {
                 <SectionCard className="mt-4 mx-4 flex-col">
                     <Text className="font-bold">Account Settings</Text>
                     <View className="px-2">
-                        <ActionRow label={'Change Password'}>
+                        <ActionRow
+                            label={'Change Password'}
+                            onPress={() =>
+                                router.push(
+                                    '/student-profile-details/change-password'
+                                )
+                            }
+                        >
                             <SimpleLineIcons
                                 name="lock"
                                 size={20}
@@ -251,113 +262,13 @@ export default function ProfileScreen() {
                         </TouchableOpacity>
                     </View>
                 </SectionCard>
-                <Modal
+                <StudentProfileEditModal
                     visible={isEditModalVisible}
-                    animationType="slide"
-                    transparent={true}
-                    onRequestClose={() => setEditModalVisible(false)}
-                >
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                        className="flex-1 justify-end bg-black/50"
-                    >
-                        <View className="bg-white rounded-t-3xl p-6">
-                            <View className="flex-row justify-between items-center mb-6">
-                                <Text className="text-xl font-bold text-gray-800">
-                                    Edit Personal Info
-                                </Text>
-                                <TouchableOpacity
-                                    onPress={() => setEditModalVisible(false)}
-                                >
-                                    <Ionicons
-                                        name="close"
-                                        size={24}
-                                        color="#4b5563"
-                                    />
-                                </TouchableOpacity>
-                            </View>
-
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                className="space-y-4"
-                            >
-                                {/* Email */}
-                                <View>
-                                    <Text className="text-gray-500 mb-1 text-sm">
-                                        Email
-                                    </Text>
-                                    <TextInput
-                                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
-                                        value={editForm.email}
-                                        onChangeText={(text) =>
-                                            setEditForm({
-                                                ...editForm,
-                                                email: text,
-                                            })
-                                        }
-                                        keyboardType="email-address"
-                                    />
-                                </View>
-
-                                {/* Phone */}
-                                <View>
-                                    <Text className="text-gray-500 mb-1 text-sm">
-                                        Phone Number
-                                    </Text>
-                                    <TextInput
-                                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
-                                        value={editForm.phone}
-                                        onChangeText={(text) =>
-                                            setEditForm({
-                                                ...editForm,
-                                                phone: text,
-                                            })
-                                        }
-                                        keyboardType="phone-pad"
-                                    />
-                                </View>
-
-                                {/* DOB */}
-                                <View>
-                                    <Text className="text-gray-500 mb-1 text-sm">
-                                        Date of Birth
-                                    </Text>
-                                    <TextInput
-                                        className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
-                                        value={editForm.dob}
-                                        onChangeText={(text) =>
-                                            setEditForm({
-                                                ...editForm,
-                                                dob: text,
-                                            })
-                                        }
-                                    />
-                                </View>
-                            </ScrollView>
-
-                            {/* Action Buttons */}
-                            <View className="flex-row mt-6 space-x-3 mb-4">
-                                <TouchableOpacity
-                                    className="flex-1 bg-gray-100 py-3 rounded-xl items-center"
-                                    onPress={() => setEditModalVisible(false)}
-                                >
-                                    <Text className="text-gray-600 font-semibold">
-                                        Cancel
-                                    </Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    className="flex-1 bg-blue-500 py-3 rounded-xl items-center"
-                                    onPress={handleSave}
-                                >
-                                    <Text className="text-white font-semibold">
-                                        Save
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </KeyboardAvoidingView>
-                </Modal>
+                    form={editForm}
+                    onChange={setEditForm}
+                    onClose={() => setEditModalVisible(false)}
+                    onSave={handleSave}
+                />
             </ScrollView>
         </>
     );

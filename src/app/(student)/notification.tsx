@@ -1,242 +1,188 @@
-import React, { useState } from 'react';
+import SectionCard from '@/components/SectionCard';
 import {
-    View,
-    Text,
-    StatusBar,
+    ManagerNotification,
+    NotificationPriority,
+} from '@/data/manager-dashboard-actions';
+import { studentNotifications } from '@/data/student-notifications';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import {
     ScrollView,
+    StatusBar,
+    Text,
     TouchableOpacity,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SectionCard from '@/components/SectionCard';
-import NotificationItem, {
-    NotificationProps,
-} from '@/components/NotificationItem';
 
-const MOCK_NOTIFICATIONS: NotificationProps[] = [
-    {
-        id: '1',
-        title: 'Transfer Request Update',
-        description: 'Your transfer request has been approved.',
-        time: '10:30 AM',
-        type: 'transfer',
-        isUnread: true,
-        isImportant: true,
-        dateGroup: 'Today',
-    },
-    {
-        id: '2',
-        title: 'Maintenance Resolved',
-        description:
-            'Your issue "Water leakage in bathroom" has been resolved.',
-        time: '9:15 AM',
-        type: 'maintenance',
-        isUnread: true,
-        isImportant: false,
-        dateGroup: 'Today',
-    },
-    {
-        id: '3',
-        title: 'New Room Announcement',
-        description:
-            'Study room B on Floor 3 will be closed for cleaning on May 18.',
-        time: '8:00 AM',
-        type: 'announcement',
-        isUnread: true,
-        isImportant: false,
-        dateGroup: 'Today',
-    },
-    {
-        id: '4',
-        title: 'Complaint Reply',
-        description:
-            'Your complaint about "Internet connection" has a new reply.',
-        time: '7:20 AM',
-        type: 'complaint',
-        isUnread: false,
-        isImportant: false,
-        dateGroup: 'Today',
-    },
-    {
-        id: '5',
-        title: 'Monthly Fee Reminder',
-        description: 'Your May 2026 room fee is due on May 25.',
-        time: 'Yesterday',
-        type: 'fee',
-        isUnread: false,
-        isImportant: true,
-        dateGroup: 'Earlier',
-    },
-    {
-        id: '6',
-        title: 'Roommate Update',
-        description: 'Tran Phuoc has moved in as your new roommate.',
-        time: 'Yesterday',
-        type: 'roommate',
-        isUnread: false,
-        isImportant: false,
-        dateGroup: 'Earlier',
-    },
-    {
-        id: '7',
-        title: 'Contract Renewal Reminder',
-        description:
-            'Your contract will expire on Jul 31, 2026. Please renew it soon.',
-        time: 'May 15, 2026',
-        type: 'contract',
-        isUnread: false,
-        isImportant: true,
-        dateGroup: 'Earlier',
-    },
-];
+type NotificationFilter = 'All' | NotificationPriority;
 
-export default function EdgeToEdgeScreen() {
+const priorityStyles: Record<
+    NotificationPriority,
+    { color: string; bg: string; icon: keyof typeof Ionicons.glyphMap }
+> = {
+    Normal: { color: '#2563EB', bg: '#DBEAFE', icon: 'information-circle' },
+    Important: { color: '#D97706', bg: '#FEF3C7', icon: 'alert-circle' },
+    Emergency: { color: '#DC2626', bg: '#FEE2E2', icon: 'warning' },
+};
+
+export default function StudentNotificationScreen() {
     const insets = useSafeAreaInsets();
-    const [activeFilter, setActiveFilter] = useState<
-        'All' | 'Unread' | 'Important'
-    >('All');
-    const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
-    const filteredData = notifications.filter((item) => {
-        if (activeFilter === 'All') return true;
-        if (activeFilter === 'Unread') return item.isUnread;
-        if (activeFilter === 'Important') return item.isImportant;
-        return true;
-    });
-    const todayItems = filteredData.filter(
-        (item) => item.dateGroup === 'Today'
-    );
-    const earlierItems = filteredData.filter(
-        (item) => item.dateGroup === 'Earlier'
+    const [filter, setFilter] = useState<NotificationFilter>('All');
+    const [readIds, setReadIds] = useState<string[]>([]);
+    const [, refreshNotifications] = useState(0);
+
+    useFocusEffect(
+        useCallback(() => {
+            refreshNotifications((value) => value + 1);
+        }, [])
     );
 
-    const handlePressNotification = (id: string) => {
-        const updatedNotifications = notifications.map(
-            (noti: NotificationProps) => {
-                if (noti.id === id) {
-                    return { ...noti, isUnread: false };
-                }
-                return noti;
-            }
-        );
+    const filteredNotifications = studentNotifications.filter(
+        (notification) => filter === 'All' || notification.priority === filter
+    );
 
-        setNotifications(updatedNotifications);
-    };
     return (
-        <>
+        <View className="flex-1 bg-[#F4FAFD]">
             <StatusBar
                 translucent
                 backgroundColor="transparent"
                 barStyle="light-content"
             />
-            <View className="bg-white flex-1 relative">
-                <View
-                    className="bg-blue-600 rounded-b-2xl px-8"
-                    style={{
-                        paddingTop: insets.top + 16,
-                        paddingBottom: 50,
-                    }}
-                >
-                    <Text className="text-2xl text-white font-bold">
-                        Notifications
-                    </Text>
-                    <Text className="text-white">
-                        Stay update with room and dorm activity
-                    </Text>
-                </View>
-                <View className="mx-4 -mt-8 bg-white rounded-2xl shadow-sm elevation-2 p-1.5 flex-row justify-between">
-                    {(['All', 'Unread', 'Important'] as const).map((filter) => {
-                        const isActive = activeFilter === filter;
+            <View
+                className="bg-blue-600 rounded-b-2xl px-6 pb-12"
+                style={{ paddingTop: insets.top + 18 }}
+            >
+                <Text className="text-white text-2xl font-bold">
+                    Notifications
+                </Text>
+                <Text className="text-blue-100 text-sm mt-1">
+                    Resident announcements from dormitory management
+                </Text>
+            </View>
+            <View className="-mt-8 flex-1 px-4">
+                <SectionCard className="p-1.5 flex-row">
+                    {(
+                        [
+                            'All',
+                            'Normal',
+                            'Important',
+                            'Emergency',
+                        ] as NotificationFilter[]
+                    ).map((option) => {
+                        const active = filter === option;
                         return (
                             <TouchableOpacity
-                                key={filter}
-                                onPress={() => setActiveFilter(filter)}
-                                className={`flex-1 flex-row items-center justify-center py-2.5 mx-0.5 rounded-xl ${isActive ? 'bg-blue-50 border border-blue-100' : 'bg-transparent'}`}
+                                key={option}
+                                onPress={() => setFilter(option)}
+                                className={`flex-1 rounded-xl py-2.5 items-center ${
+                                    active ? 'bg-blue-600' : 'bg-white'
+                                }`}
                             >
                                 <Text
-                                    className={`text-sm font-semibold ${isActive ? 'text-blue-600' : 'text-gray-500'}`}
+                                    className={`text-[11px] font-bold ${
+                                        active ? 'text-white' : 'text-[#64748B]'
+                                    }`}
                                 >
-                                    {filter}
+                                    {option}
                                 </Text>
-
-                                {/* Badge */}
-                                <View
-                                    className={`ml-2 px-1.5 py-0.5 rounded-full bg-blue-600 ${filter === 'Important' ? 'bg-red-500' : ''}`}
-                                >
-                                    <Text className="text-white text-[10px] font-bold">
-                                        {filter === 'All'
-                                            ? notifications.length
-                                            : filter === 'Unread'
-                                              ? notifications.filter(
-                                                    (i) => i.isUnread
-                                                ).length
-                                              : notifications.filter(
-                                                    (i) => i.isImportant
-                                                ).length}
-                                    </Text>
-                                </View>
                             </TouchableOpacity>
                         );
                     })}
-                </View>
+                </SectionCard>
                 <ScrollView
-                    className="flex-1 px-4 mt-2"
+                    className="flex-1 mt-4"
+                    contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Today */}
-                    {todayItems.length > 0 && (
-                        <View className="mt-4">
-                            <Text className="text-gray-500 font-medium ml-1 mb-2">
-                                Today
-                            </Text>
-                            <SectionCard className="p-0 px-4">
-                                {todayItems.map((item, index) => (
-                                    <NotificationItem
-                                        key={item.id}
-                                        data={item}
-                                        isLast={index === todayItems.length - 1}
-                                        onPress={() =>
-                                            handlePressNotification(item.id)
-                                        }
-                                    />
-                                ))}
-                            </SectionCard>
-                        </View>
-                    )}
-
-                    {/* Earlier */}
-                    {earlierItems.length > 0 && (
-                        <View className="mt-6 mb-6">
-                            <Text className="text-gray-500 font-medium ml-1 mb-2">
-                                Earlier
-                            </Text>
-                            <SectionCard className="p-0 px-4">
-                                {earlierItems.map((item, index) => (
-                                    <NotificationItem
-                                        key={item.id}
-                                        data={item}
-                                        isLast={
-                                            index === earlierItems.length - 1
-                                        }
-                                        onPress={() =>
-                                            handlePressNotification(item.id)
-                                        }
-                                    />
-                                ))}
-                            </SectionCard>
-                        </View>
-                    )}
-
-                    {/* No Notification */}
-                    {filteredData.length === 0 && (
-                        <View className="items-center mt-10">
-                            <Text className="text-gray-400">
-                                No notifications found.
-                            </Text>
-                        </View>
-                    )}
-
-                    <View className="h-10" />
+                    {filteredNotifications.map((notification) => (
+                        <StudentNotificationCard
+                            key={notification.id}
+                            notification={notification}
+                            read={readIds.includes(notification.id)}
+                            onPress={() =>
+                                setReadIds((current) =>
+                                    current.includes(notification.id)
+                                        ? current
+                                        : [...current, notification.id]
+                                )
+                            }
+                        />
+                    ))}
                 </ScrollView>
             </View>
-        </>
+        </View>
+    );
+}
+
+function StudentNotificationCard({
+    notification,
+    read,
+    onPress,
+}: {
+    notification: ManagerNotification;
+    read: boolean;
+    onPress: () => void;
+}) {
+    const priority = priorityStyles[notification.priority];
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={onPress}
+            className="bg-white rounded-2xl p-4 border border-gray-100 shadow-xl"
+        >
+            <View className="flex-row items-start">
+                <View
+                    className="w-11 h-11 rounded-full items-center justify-center"
+                    style={{ backgroundColor: priority.bg }}
+                >
+                    <Ionicons
+                        name={priority.icon}
+                        size={21}
+                        color={priority.color}
+                    />
+                </View>
+                <View className="ml-3 flex-1">
+                    <View className="flex-row items-start">
+                        <Text className="text-[#1E293B] text-base font-bold flex-1">
+                            {notification.title}
+                        </Text>
+                        {!read && (
+                            <View className="w-2.5 h-2.5 rounded-full bg-blue-600 mt-1.5 ml-2" />
+                        )}
+                    </View>
+                    <View
+                        className="self-start rounded-full px-2.5 py-1 mt-2 flex-row items-center"
+                        style={{ backgroundColor: priority.bg }}
+                    >
+                        <Ionicons
+                            name={priority.icon}
+                            size={12}
+                            color={priority.color}
+                        />
+                        <Text
+                            className="text-[10px] font-bold ml-1"
+                            style={{ color: priority.color }}
+                        >
+                            {notification.priority}
+                        </Text>
+                    </View>
+                    <Text className="text-[#64748B] text-sm font-medium leading-5 mt-2">
+                        {notification.message}
+                    </Text>
+                </View>
+            </View>
+            <View className="flex-row items-center border-t border-gray-100 mt-3 pt-3">
+                <Ionicons name="people-outline" size={14} color="#2563EB" />
+                <Text className="text-[#475569] text-xs font-bold ml-1.5 flex-1">
+                    {notification.audience}
+                </Text>
+                <Text className="text-[#94A3B8] text-[10px] font-semibold">
+                    {notification.createdAt}
+                </Text>
+            </View>
+        </TouchableOpacity>
     );
 }

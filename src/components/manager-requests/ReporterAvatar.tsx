@@ -3,15 +3,17 @@ import { Text, View } from 'react-native';
 
 interface ReporterAvatarProps {
     initials: string;
-    size?: 'sm' | 'md';
+    size?: 'sm' | 'md' | 'lg';
 }
 
 export default function ReporterAvatar({
     initials,
     size = 'md',
 }: ReporterAvatarProps) {
-    const dimension = size === 'sm' ? 'w-9 h-9' : 'w-11 h-11';
-    const textSize = size === 'sm' ? 'text-xs' : 'text-sm';
+    const dimension =
+        size === 'lg' ? 'w-20 h-20' : size === 'sm' ? 'w-9 h-9' : 'w-11 h-11';
+    const textSize =
+        size === 'lg' ? 'text-xl' : size === 'sm' ? 'text-xs' : 'text-sm';
 
     return (
         <View

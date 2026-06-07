@@ -23,7 +23,7 @@ export default function WorkRequestCard({
         <TouchableOpacity
             activeOpacity={0.75}
             onPress={() => onPress(item)}
-            className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm shadow-gray-200"
+            className="bg-white rounded-2xl p-4 border border-gray-100 shadow-xl"
         >
             <View className="flex-row items-start">
                 <View className="flex-1">

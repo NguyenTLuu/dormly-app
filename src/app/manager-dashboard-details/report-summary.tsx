@@ -15,13 +15,13 @@ import {
 } from '@/data/manager-dashboard';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, ScrollView, StatusBar, Text, View } from 'react-native';
+import { ScrollView, StatusBar, Text, View } from 'react-native';
+import { toast } from 'sonner-native';
 
 const showMockExport = (format: 'PDF' | 'Excel') => {
-    Alert.alert(
-        `${format} export`,
-        `Mock ${format} summary report is ready for preview. File generation will be connected later.`
-    );
+    toast.success(`${format} export`, {
+        description: `Mock ${format} summary report is ready for preview. File generation will be connected later.`,
+    });
 };
 
 export default function ReportSummaryScreen() {

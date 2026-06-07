@@ -7,12 +7,14 @@ interface ManagerHeaderProps {
     title: string;
     subtitle: string;
     onBack?: () => void;
+    rightAction?: React.ReactNode;
 }
 
 export default function ManagerHeader({
     title,
     subtitle,
     onBack,
+    rightAction,
 }: ManagerHeaderProps) {
     const insets = useSafeAreaInsets();
 
@@ -39,6 +41,7 @@ export default function ManagerHeader({
                         {subtitle}
                     </Text>
                 </View>
+                {rightAction}
             </View>
         </View>
     );

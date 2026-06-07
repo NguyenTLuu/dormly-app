@@ -1,13 +1,13 @@
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import React, { useState } from 'react';
-import { Image } from 'expo-image';
-import { Checkbox } from 'expo-checkbox';
-import { ScreenWrapper } from '@/components/ScreenWrapper';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Ionicons } from '@expo/vector-icons';
-import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
-import { Link, useRouter } from 'expo-router';
 import LogoImage from '@/components/LogoImage';
+import { ScreenWrapper } from '@/components/ScreenWrapper';
+import { Ionicons } from '@expo/vector-icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
+import { Checkbox } from 'expo-checkbox';
+import { Link, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { toast } from 'sonner-native';
 
 const MOCK_USERS = [
     {
@@ -33,7 +33,9 @@ export default function Login() {
 
     const handleLogin = () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Please enter both email and password!');
+            toast.error('Error', {
+                description: 'Please enter both email and password.',
+            });
             return;
         }
 
@@ -50,7 +52,9 @@ export default function Login() {
                 router.replace('/(manager)/dashboard');
             }
         } else {
-            Alert.alert('Error', 'Email or password is incorrect!');
+            toast.error('Error', {
+                description: 'Email or password is incorrect.',
+            });
         }
     };
     return (
@@ -164,6 +168,26 @@ export default function Login() {
                         <TouchableOpacity activeOpacity={0.4} className="mt-2">
                             <Text className="font-bold text-blue-500 text-base">
                                 Contact with EIU Dormitory
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View className="items-center justify-center flex-row gap-5 mt-5">
+                        <TouchableOpacity
+                            onPress={() => router.replace('/(student)/home')}
+                            className="bg-blue-500 px-3 py-2 rounded-xl"
+                        >
+                            <Text className="text-white font-medium">
+                                Student
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() =>
+                                router.replace('/(manager)/dashboard')
+                            }
+                            className="bg-blue-500 px-3 py-2 rounded-xl"
+                        >
+                            <Text className="text-white font-medium">
+                                Manager
                             </Text>
                         </TouchableOpacity>
                     </View>
