@@ -4,9 +4,11 @@
 
 - `/`: mock auth gate; redirects to login, manager dashboard, or student home based on hard-coded state.
 - `/(auth)/login`: login UI.
+- `/(auth)/register`: student account registration request UI.
 - `/(auth)/forgot-pass`: password reset UI.
 - `/(auth)/first-time-login`: first-login password-change UI.
 - Authentication behavior beyond UI is not confirmed.
+- Auth forms keep focused inputs reachable while the keyboard is visible and move to the next field from the keyboard action where applicable.
 
 ## Manager Bottom Tabs
 

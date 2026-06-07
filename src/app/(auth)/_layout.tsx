@@ -10,6 +10,10 @@ export default function AuthLayout() {
         >
             <Stack.Screen name="login" options={{ title: 'Login' }} />
             <Stack.Screen
+                name="register"
+                options={{ title: 'Student Registration' }}
+            />
+            <Stack.Screen
                 name="forgot-pass"
                 options={{ title: 'Reset Password' }}
             />

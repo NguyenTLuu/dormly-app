@@ -1,21 +1,53 @@
-import { ScreenWrapper } from '@/components/ScreenWrapper';
+import AuthKeyboardLayout from '@/components/auth/AuthKeyboardLayout';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
-import { Feather, Ionicons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
-import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import Octicons from '@expo/vector-icons/Octicons';
 import Entypo from '@expo/vector-icons/Entypo';
 import LogoImage from '@/components/LogoImage';
+import { toast } from 'sonner-native';
 
 export default function FirstTimeLogin() {
+    const router = useRouter();
+    const confirmPasswordInputRef = useRef<TextInput>(null);
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
         useState<boolean>(false);
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const handleChangePassword = () => {
+        if (!password || !confirmPassword) {
+            toast.error('Error', {
+                description: 'Please enter and confirm your new password.',
+            });
+            return;
+        }
+
+        if (password.length < 8) {
+            toast.error('Error', {
+                description: 'Password must contain at least 8 characters.',
+            });
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            toast.error('Error', {
+                description: 'Passwords do not match.',
+            });
+            return;
+        }
+
+        toast.success('Success', {
+            description: 'Your password has been changed.',
+        });
+        router.replace('/login');
+    };
+
     return (
-        <ScreenWrapper>
+        <AuthKeyboardLayout>
             <View className="items-center flex-1 w-full bg-[#F4FAFD] pt-10">
                 <LogoImage />
                 <Text className="font-bold text-2xl mb-2">
@@ -38,6 +70,14 @@ export default function FirstTimeLogin() {
                             placeholder="Enter your new password"
                             placeholderTextColor="#aaa"
                             secureTextEntry={!isPasswordVisible}
+                            value={password}
+                            onChangeText={setPassword}
+                            autoCapitalize="none"
+                            returnKeyType="next"
+                            submitBehavior="submit"
+                            onSubmitEditing={() =>
+                                confirmPasswordInputRef.current?.focus()
+                            }
                         />
                         <TouchableOpacity
                             onPress={() =>
@@ -64,10 +104,17 @@ export default function FirstTimeLogin() {
                             style={{ marginRight: 10 }}
                         />
                         <TextInput
+                            ref={confirmPasswordInputRef}
                             className="flex-1"
                             placeholder="Confirm your new password"
                             placeholderTextColor="#aaa"
                             secureTextEntry={!isConfirmPasswordVisible}
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            autoCapitalize="none"
+                            returnKeyType="done"
+                            submitBehavior="submit"
+                            onSubmitEditing={handleChangePassword}
                         />
                         <TouchableOpacity
                             onPress={() =>
@@ -102,12 +149,7 @@ export default function FirstTimeLogin() {
 
                         <View className="flex-col ml-4 mt-1">
                             <View className="flex-row">
-                                <Entypo
-                                    name="check"
-                                    size={16}
-                                    color="green"
-                                    cl
-                                />
+                                <Entypo name="check" size={16} color="green" />
                                 <Text className="ml-1 text-sm">
                                     At least 8 characters
                                 </Text>
@@ -127,18 +169,17 @@ export default function FirstTimeLogin() {
                             </View>
                         </View>
                     </View>
-                    <Link href="/first-time-login" asChild>
-                        <TouchableOpacity
-                            activeOpacity={0.6}
-                            className="bg-[#1D63E0] rounded-xl h-[50px] justify-center items-center mt-5"
-                        >
-                            <Text className="text-white font-bold text-xl">
-                                Change password
-                            </Text>
-                        </TouchableOpacity>
-                    </Link>
+                    <TouchableOpacity
+                        activeOpacity={0.6}
+                        onPress={handleChangePassword}
+                        className="bg-[#1D63E0] rounded-xl h-[50px] justify-center items-center mt-5"
+                    >
+                        <Text className="text-white font-bold text-xl">
+                            Change password
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-        </ScreenWrapper>
+        </AuthKeyboardLayout>
     );
 }

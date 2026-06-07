@@ -1,5 +1,5 @@
-import { ScreenWrapper } from '@/components/ScreenWrapper';
-import React, { useState } from 'react';
+import AuthKeyboardLayout from '@/components/auth/AuthKeyboardLayout';
+import React, { useRef, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { toast } from 'sonner-native';
 
 export default function ResetPassScreen() {
     const router = useRouter();
+    const confirmPasswordInputRef = useRef<TextInput>(null);
 
     const [step, setStep] = useState(1);
 
@@ -82,7 +83,7 @@ export default function ResetPassScreen() {
         }`;
     };
     return (
-        <ScreenWrapper className="bg-[#F4FAFD]">
+        <AuthKeyboardLayout>
             <View className="flex-1 items-center px-6 pt-10 bg-[#F4FAFD]">
                 <LogoImage />
                 <Text className="text-2xl font-bold text-[#1E293B] mb-10">
@@ -131,7 +132,6 @@ export default function ResetPassScreen() {
                     </View>
                 </View>
 
-
                 {/* Step 1 */}
                 {step === 1 && (
                     <View className="w-full items-center">
@@ -153,6 +153,11 @@ export default function ResetPassScreen() {
                                 value={email}
                                 onChangeText={setEmail}
                                 autoCapitalize="none"
+                                autoCorrect={false}
+                                keyboardType="email-address"
+                                returnKeyType="done"
+                                submitBehavior="submit"
+                                onSubmitEditing={handleSubmitStep1}
                             />
                         </View>
                         <TouchableOpacity
@@ -189,6 +194,9 @@ export default function ResetPassScreen() {
                                 onChangeText={setOtp}
                                 keyboardType="number-pad"
                                 maxLength={6}
+                                returnKeyType="done"
+                                submitBehavior="submit"
+                                onSubmitEditing={handleSubmitStep2}
                             />
                         </View>
                         <TouchableOpacity
@@ -229,6 +237,12 @@ export default function ResetPassScreen() {
                                 value={newPassword}
                                 onChangeText={setNewPassword}
                                 secureTextEntry={!showPassword}
+                                autoCapitalize="none"
+                                returnKeyType="next"
+                                submitBehavior="submit"
+                                onSubmitEditing={() =>
+                                    confirmPasswordInputRef.current?.focus()
+                                }
                             />
                             <TouchableOpacity
                                 onPress={() => setShowPassword(!showPassword)}
@@ -254,12 +268,17 @@ export default function ResetPassScreen() {
                                 style={{ marginRight: 10 }}
                             />
                             <TextInput
+                                ref={confirmPasswordInputRef}
                                 className="flex-1 text-base text-[#1E293B]"
                                 placeholder="Confirm Password"
                                 placeholderTextColor="#A0AEC0"
                                 value={confirmPassword}
                                 onChangeText={setConfirmPassword}
-                                secureTextEntry={!showPassword}
+                                secureTextEntry={!showConfirmPassword}
+                                autoCapitalize="none"
+                                returnKeyType="done"
+                                submitBehavior="submit"
+                                onSubmitEditing={handleSubmitStep3}
                             />
                             <TouchableOpacity
                                 onPress={() =>
@@ -303,6 +322,6 @@ export default function ResetPassScreen() {
                     </Link>
                 )}
             </View>
-        </ScreenWrapper>
+        </AuthKeyboardLayout>
     );
 }

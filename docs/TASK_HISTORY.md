@@ -93,6 +93,7 @@ This file records implemented project direction visible in the repository, not a
 - Adopted `sonner-native` toast feedback for newer flows.
 - Split manager feature components into dedicated folders instead of large route files.
 - Kept operational data typed and mock-based under `src/data`.
+- Added a mock student registration screen under auth and made auth forms keyboard-aware with field-to-field keyboard actions.
 
 ## Known Follow-Up Risks
 

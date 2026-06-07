@@ -9,6 +9,11 @@
 - Use white cards with restrained borders/shadows and rounded corners.
 - Prefer icon-led labels and compact operational layouts over decorative/marketing layouts.
 
+## Authentication
+
+- Auth screens use the light-blue background, DORMLY logo image, white rounded input rows, and blue primary actions.
+- Auth forms use chat-style animated keyboard lifting, keyboard-aware scrolling, and keyboard Next/Done actions to move through input fields.
+
 ## Manager Screen Pattern
 
 - Bottom-tab screens use `ManagerHeader`: blue rounded-bottom header, title, subtitle, safe-area spacing.

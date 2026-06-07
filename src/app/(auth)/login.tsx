@@ -1,11 +1,11 @@
+import AuthKeyboardLayout from '@/components/auth/AuthKeyboardLayout';
 import LogoImage from '@/components/LogoImage';
-import { ScreenWrapper } from '@/components/ScreenWrapper';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { Checkbox } from 'expo-checkbox';
 import { Link, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { toast } from 'sonner-native';
 
@@ -24,6 +24,7 @@ const MOCK_USERS = [
 
 export default function Login() {
     const router = useRouter();
+    const passwordInputRef = useRef<TextInput>(null);
 
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
     const [isRemembered, setIsRemembered] = useState<boolean>(false);
@@ -58,8 +59,8 @@ export default function Login() {
         }
     };
     return (
-        <ScreenWrapper>
-            <View className="items-center flex-1 w-full  pt-10 bg-[#F4FAFD]">
+        <AuthKeyboardLayout>
+            <View className="items-center flex-1 w-full pt-10 bg-[#F4FAFD]">
                 <LogoImage />
 
                 <Text className="font-bold text-4xl mb-3">Welcome back!</Text>
@@ -87,6 +88,11 @@ export default function Login() {
                             autoCorrect={false}
                             spellCheck={false}
                             keyboardType="email-address"
+                            returnKeyType="next"
+                            submitBehavior="submit"
+                            onSubmitEditing={() =>
+                                passwordInputRef.current?.focus()
+                            }
                         />
                     </View>
 
@@ -99,12 +105,17 @@ export default function Login() {
                             style={{ marginRight: 10 }}
                         />
                         <TextInput
+                            ref={passwordInputRef}
                             className="flex-1"
                             placeholder="Enter your password"
                             placeholderTextColor="#aaa"
                             secureTextEntry={!isPasswordVisible}
                             value={password}
                             onChangeText={setPassword}
+                            autoCapitalize="none"
+                            returnKeyType="done"
+                            submitBehavior="submit"
+                            onSubmitEditing={handleLogin}
                         />
                         <TouchableOpacity
                             onPress={() =>
@@ -165,13 +176,18 @@ export default function Login() {
                         <Text className="font-medium text-sm">
                             {"Don't have an account?"}
                         </Text>
-                        <TouchableOpacity activeOpacity={0.4} className="mt-2">
-                            <Text className="font-bold text-blue-500 text-base">
-                                Contact with EIU Dormitory
-                            </Text>
-                        </TouchableOpacity>
+                        <Link href="/register" asChild>
+                            <TouchableOpacity
+                                activeOpacity={0.4}
+                                className="mt-2"
+                            >
+                                <Text className="font-bold text-blue-500 text-base">
+                                    Register student account
+                                </Text>
+                            </TouchableOpacity>
+                        </Link>
                     </View>
-                    <View className="items-center justify-center flex-row gap-5 mt-5">
+                    {/* <View className="items-center justify-center flex-row gap-5 mt-5">
                         <TouchableOpacity
                             onPress={() => router.replace('/(student)/home')}
                             className="bg-blue-500 px-3 py-2 rounded-xl"
@@ -190,9 +206,9 @@ export default function Login() {
                                 Manager
                             </Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                 </View>
             </View>
-        </ScreenWrapper>
+        </AuthKeyboardLayout>
     );
 }

@@ -28,7 +28,7 @@
 ## Repository Structure
 
 - `src/app/`: Expo Router routes.
-- `src/app/(auth)/`: login, password reset, first-time login.
+- `src/app/(auth)/`: login, student registration, password reset, first-time login.
 - `src/app/(student)/`: student bottom-tab screens.
 - `src/app/(manager)/`: manager bottom-tab screens.
 - `src/app/manager-details/`: stack detail screens for students, rooms, and tickets.
