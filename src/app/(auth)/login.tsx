@@ -1,29 +1,19 @@
 import AuthKeyboardLayout from '@/components/auth/AuthKeyboardLayout';
 import LogoImage from '@/components/LogoImage';
+import { useLogin } from '@/hooks/useLogin';
+import type { ApiErrorResponse } from '@/types/api';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
+import axios from 'axios';
 import { Checkbox } from 'expo-checkbox';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { toast } from 'sonner-native';
 
-const MOCK_USERS = [
-    {
-        email: 'student@dormly.com',
-        password: '123456',
-        role: 'STUDENT',
-    },
-    {
-        email: 'manager@dormly.com',
-        password: '123456',
-        role: 'MANAGER',
-    },
-];
-
 export default function Login() {
-    const router = useRouter();
+    const loginMutation = useLogin();
     const passwordInputRef = useRef<TextInput>(null);
 
     const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
@@ -33,30 +23,36 @@ export default function Login() {
     const [password, setPassword] = useState('');
 
     const handleLogin = () => {
-        if (!email || !password) {
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!normalizedEmail || !password) {
             toast.error('Error', {
                 description: 'Please enter both email and password.',
             });
+
             return;
         }
 
-        const user = MOCK_USERS.find(
-            (u) =>
-                u.email.toLowerCase() === email.toLowerCase() &&
-                u.password === password
-        );
+        loginMutation.mutate(
+            {
+                email: normalizedEmail,
+                password,
+            },
+            {
+                onError: (error) => {
+                    let errorMessage = 'Email or password is incorrect.';
 
-        if (user) {
-            if (user.role === 'STUDENT') {
-                router.replace('/(student)/home');
-            } else if (user.role === 'MANAGER') {
-                router.replace('/(manager)/dashboard');
+                    if (axios.isAxiosError<ApiErrorResponse>(error)) {
+                        errorMessage =
+                            error.response?.data?.message ?? errorMessage;
+                    }
+
+                    toast.error('Login failed', {
+                        description: errorMessage,
+                    });
+                },
             }
-        } else {
-            toast.error('Error', {
-                description: 'Email or password is incorrect.',
-            });
-        }
+        );
     };
     return (
         <AuthKeyboardLayout>
@@ -65,8 +61,8 @@ export default function Login() {
 
                 <Text className="font-bold text-4xl mb-3">Welcome back!</Text>
 
-                <Text className="text-gray-500 mb-6 text-xs px-10 text-center">
-                    student@dormly.com || manager@dormly.com (Pass: 123456)
+                <Text className="mb-6 px-10 text-center text-xs text-gray-500">
+                    Sign in to continue using Dormly
                 </Text>
 
                 <View className="px-3 w-full">
@@ -93,6 +89,7 @@ export default function Login() {
                             onSubmitEditing={() =>
                                 passwordInputRef.current?.focus()
                             }
+                            editable={!loginMutation.isPending}
                         />
                     </View>
 
@@ -116,6 +113,7 @@ export default function Login() {
                             returnKeyType="done"
                             submitBehavior="submit"
                             onSubmitEditing={handleLogin}
+                            editable={!loginMutation.isPending}
                         />
                         <TouchableOpacity
                             onPress={() =>
@@ -152,7 +150,7 @@ export default function Login() {
                                 Remember me
                             </Text>
                         </View>
-                        <Link href="/forgot-pass" asChild>
+                        <Link href="/(auth)/forgot-pass" asChild>
                             <TouchableOpacity activeOpacity={0.4}>
                                 <Text className="text-blue-500 text-sm font-medium">
                                     Forget your password?
@@ -165,10 +163,15 @@ export default function Login() {
                     <TouchableOpacity
                         activeOpacity={0.6}
                         onPress={handleLogin}
-                        className="bg-[#1D63E0] rounded-xl h-[50px] justify-center items-center mt-10"
+                        disabled={loginMutation.isPending}
+                        className={`mt-10 h-[50px] items-center justify-center rounded-xl bg-[#1D63E0] ${
+                            loginMutation.isPending ? 'opacity-60' : ''
+                        }`}
                     >
-                        <Text className="text-white font-bold text-xl">
-                            Login
+                        <Text className="text-xl font-bold text-white">
+                            {loginMutation.isPending
+                                ? 'Signing in...'
+                                : 'Login'}
                         </Text>
                     </TouchableOpacity>
 
@@ -176,7 +179,7 @@ export default function Login() {
                         <Text className="font-medium text-sm">
                             {"Don't have an account?"}
                         </Text>
-                        <Link href="/register" asChild>
+                        <Link href="/(auth)/register" asChild>
                             <TouchableOpacity
                                 activeOpacity={0.4}
                                 className="mt-2"
@@ -189,7 +192,7 @@ export default function Login() {
                     </View>
                     {/* <View className="items-center justify-center flex-row gap-5 mt-5">
                         <TouchableOpacity
-                            onPress={() => router.replace('/(student)/home')}
+                            onPress={() => router.replace('/(user)/home')}
                             className="bg-blue-500 px-3 py-2 rounded-xl"
                         >
                             <Text className="text-white font-medium">
@@ -198,7 +201,7 @@ export default function Login() {
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() =>
-                                router.replace('/(manager)/dashboard')
+                                router.replace('/(admin)/dashboard')
                             }
                             className="bg-blue-500 px-3 py-2 rounded-xl"
                         >

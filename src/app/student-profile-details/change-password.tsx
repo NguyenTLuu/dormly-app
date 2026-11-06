@@ -1,6 +1,9 @@
 import { StudentRequestHeader } from '@/components/student-requests';
+import { changeStudentPassword } from '@/api/studentProfileApi';
+import { useAuth } from '@/auth/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -15,10 +18,24 @@ import { toast } from 'sonner-native';
 
 export default function StudentChangePasswordScreen() {
     const router = useRouter();
+    const { session } = useAuth();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [visibleFields, setVisibleFields] = useState<string[]>([]);
+    const changePassword = useMutation({
+        mutationFn: () =>
+            changeStudentPassword(session!.userId, {
+                oldPassword: currentPassword,
+                newPassword,
+                confirmPassword,
+            }),
+        onSuccess: () => {
+            toast.success('Password changed successfully');
+            router.back();
+        },
+        onError: () => toast.error('Could not change password'),
+    });
 
     const toggleVisibility = (field: string) => {
         setVisibleFields((current) =>
@@ -46,8 +63,7 @@ export default function StudentChangePasswordScreen() {
             return;
         }
 
-        toast.success('Password changed successfully');
-        router.back();
+        changePassword.mutate();
     };
 
     return (
@@ -106,10 +122,13 @@ export default function StudentChangePasswordScreen() {
                     <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={handleChangePassword}
-                        className="bg-blue-600 rounded-2xl py-4 items-center mt-5"
+                        disabled={changePassword.isPending}
+                        className={`rounded-2xl py-4 items-center mt-5 ${changePassword.isPending ? 'bg-blue-300' : 'bg-blue-600'}`}
                     >
                         <Text className="text-white text-base font-bold">
-                            Update password
+                            {changePassword.isPending
+                                ? 'Updating password...'
+                                : 'Update password'}
                         </Text>
                     </TouchableOpacity>
                 </View>

@@ -1,15 +1,12 @@
-import {
-    StudentAttachment,
-    StudentIssueType,
-    StudentRequestKind,
-    studentIssueTypes,
-    studentPriorityOptions,
-    submitStudentWorkRequest,
-} from '@/data/student-requests';
-import { Priority } from '@/data/manager-requests';
+import { createTicketApi } from '@/api/ticketApi';
+import AttachmentPicker from '@/components/student-requests/AttachmentPicker';
+import { useKeyboardBottomPadding } from '@/hooks/useKeyboardBottomPadding';
+import type { ApiErrorResponse } from '@/types/api';
+import type { TicketAttachment, TicketCategory } from '@/types/ticket';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { isAxiosError } from 'axios';
+import { useRouter } from 'expo-router';
+import React, { useRef, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -20,44 +17,95 @@ import {
     View,
 } from 'react-native';
 import { toast } from 'sonner-native';
-import AttachmentPicker from './AttachmentPicker';
+
 import StudentRequestHeader from './StudentRequestHeader';
 
-const issueTypeStyles: Record<
-    StudentIssueType,
-    { icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }
-> = {
-    Electric: { icon: 'flash-outline', color: '#D97706', bg: '#FEF3C7' },
-    Water: { icon: 'water-outline', color: '#0284C7', bg: '#E0F2FE' },
-    Internet: { icon: 'wifi-outline', color: '#2563EB', bg: '#DBEAFE' },
-    Facility: { icon: 'build-outline', color: '#EA580C', bg: '#FFEDD5' },
-};
+const ticketCategories: {
+    value: TicketCategory;
+    label: string;
+    description: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+    backgroundColor: string;
+}[] = [
+    {
+        value: 'MAINTENANCE',
+        label: 'Maintenance',
+        description: 'Electricity, water, internet, or repairs',
+        icon: 'construct-outline',
+        color: '#EA580C',
+        backgroundColor: '#FFEDD5',
+    },
+    {
+        value: 'FACILITY',
+        label: 'Facility',
+        description: 'Furniture, shared spaces, or equipment',
+        icon: 'business-outline',
+        color: '#2563EB',
+        backgroundColor: '#DBEAFE',
+    },
+    {
+        value: 'ROOMMATE',
+        label: 'Roommate',
+        description: 'Noise, living habits, or roommate concerns',
+        icon: 'people-outline',
+        color: '#7C3AED',
+        backgroundColor: '#EDE9FE',
+    },
+    {
+        value: 'SECURITY',
+        label: 'Security',
+        description: 'Safety, access, or suspicious activity',
+        icon: 'shield-checkmark-outline',
+        color: '#DC2626',
+        backgroundColor: '#FEE2E2',
+    },
+    {
+        value: 'BILLING',
+        label: 'Billing',
+        description: 'Fees, invoices, or payment questions',
+        icon: 'receipt-outline',
+        color: '#0284C7',
+        backgroundColor: '#E0F2FE',
+    },
+    {
+        value: 'OTHER',
+        label: 'Other',
+        description: 'Any concern not listed above',
+        icon: 'ellipsis-horizontal-circle-outline',
+        color: '#64748B',
+        backgroundColor: '#F1F5F9',
+    },
+];
 
-interface StudentWorkRequestFormProps {
-    kind: StudentRequestKind;
-}
-
-export default function StudentWorkRequestForm({
-    kind,
-}: StudentWorkRequestFormProps) {
+export default function StudentWorkRequestForm() {
     const router = useRouter();
-    const params = useLocalSearchParams<{ type?: StudentIssueType }>();
-    const isIssue = kind === 'issue';
-    const accentColor = isIssue ? '#EA580C' : '#7C3AED';
-    const accentBg = isIssue ? '#FFF7ED' : '#F5F3FF';
-    const [issueType, setIssueType] = useState<StudentIssueType | undefined>(
-        isIssue && studentIssueTypes.includes(params.type as StudentIssueType)
-            ? (params.type as StudentIssueType)
-            : undefined
-    );
+    const [category, setCategory] = useState<TicketCategory>();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [priority, setPriority] = useState<Priority>('Medium');
-    const [attachments, setAttachments] = useState<StudentAttachment[]>([]);
+    const [attachments, setAttachments] = useState<TicketAttachment[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
+    const bottomPadding = useKeyboardBottomPadding();
 
-    const handleSubmit = () => {
-        if (isIssue && !issueType) {
-            toast.error('Select an issue type');
+    const revealFocusedField = () => {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 150);
+        });
+    };
+
+    const getErrorMessage = (error: unknown) => {
+        if (isAxiosError<ApiErrorResponse>(error)) {
+            return error.response?.data?.message ?? 'Please try again.';
+        }
+        return 'Please try again.';
+    };
+
+    const handleSubmit = async () => {
+        if (!category) {
+            toast.error('Select a ticket category');
             return;
         }
         if (!title.trim() || !description.trim()) {
@@ -65,18 +113,25 @@ export default function StudentWorkRequestForm({
             return;
         }
 
-        submitStudentWorkRequest({
-            kind,
-            issueType,
-            title: title.trim(),
-            description: description.trim(),
-            priority,
-            attachments,
-        });
-        toast.success(isIssue ? 'Issue submitted' : 'Complaint submitted', {
-            description: 'Dormitory management will review your request.',
-        });
-        router.back();
+        setIsSubmitting(true);
+        try {
+            const ticket = await createTicketApi({
+                category,
+                title: title.trim(),
+                description: description.trim(),
+                files: attachments,
+            });
+            toast.success('Issue ticket submitted', {
+                description: `${ticket.code} is now open for review.`,
+            });
+            router.back();
+        } catch (error) {
+            toast.error('Could not submit ticket', {
+                description: getErrorMessage(error),
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -84,180 +139,144 @@ export default function StudentWorkRequestForm({
             className="flex-1 bg-[#F4FAFD]"
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+            <StudentRequestHeader
+                title="Create issue ticket"
+                subtitle="Select a category and tell dormitory management what happened"
+                color="#EA580C"
+            />
             <ScrollView
+                ref={scrollViewRef}
                 className="flex-1"
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode="on-drag"
                 automaticallyAdjustKeyboardInsets
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 160 }}
+                contentContainerStyle={{ paddingBottom: bottomPadding }}
             >
-                <StudentRequestHeader
-                    title={isIssue ? 'Report an issue' : 'Create complaint'}
-                    subtitle={
-                        isIssue
-                            ? 'Tell us what needs to be fixed'
-                            : 'Share your concern with dormitory management'
-                    }
-                    color={accentColor}
-                />
-
                 <View className="px-4 pt-5">
-                    {isIssue && (
-                        <View className="bg-white rounded-3xl p-4 border border-slate-100 shadow-xl mb-4">
-                            <Text className="text-[#1E293B] text-base font-bold">
-                                Choose issue type
-                            </Text>
-                            <Text className="text-[#94A3B8] text-xs font-medium mt-1">
-                                Select the category that best matches the issue.
-                            </Text>
-                            <View className="flex-row flex-wrap justify-between mt-3">
-                                {studentIssueTypes.map((type) => {
-                                    const style = issueTypeStyles[type];
-                                    const selected = issueType === type;
-
-                                    return (
-                                        <TouchableOpacity
-                                            key={type}
-                                            activeOpacity={0.75}
-                                            onPress={() => setIssueType(type)}
-                                            className="w-[48%] rounded-2xl border p-3 mb-3 flex-row items-center"
+                    <View className="bg-white rounded-3xl p-4 border border-slate-100 shadow-xl mb-4">
+                        <Text className="text-[#1E293B] text-base font-bold">
+                            Ticket category
+                            <Text className="text-red-500"> *</Text>
+                        </Text>
+                        <Text className="text-[#94A3B8] text-xs font-medium mt-1">
+                            Choose the category that best describes your
+                            request.
+                        </Text>
+                        <View className="mt-3 gap-2">
+                            {ticketCategories.map((option) => {
+                                const selected = category === option.value;
+                                return (
+                                    <TouchableOpacity
+                                        key={option.value}
+                                        activeOpacity={0.75}
+                                        disabled={isSubmitting}
+                                        onPress={() =>
+                                            setCategory(option.value)
+                                        }
+                                        className="rounded-2xl border p-3 flex-row items-center"
+                                        style={{
+                                            borderColor: selected
+                                                ? option.color
+                                                : '#E2E8F0',
+                                            backgroundColor: selected
+                                                ? option.backgroundColor
+                                                : '#FFFFFF',
+                                        }}
+                                    >
+                                        <View
+                                            className="w-10 h-10 rounded-xl items-center justify-center"
                                             style={{
-                                                borderColor: selected
-                                                    ? style.color
-                                                    : '#E2E8F0',
-                                                backgroundColor: selected
-                                                    ? style.bg
-                                                    : '#FFFFFF',
+                                                backgroundColor:
+                                                    option.backgroundColor,
                                             }}
                                         >
-                                            <View
-                                                className="w-10 h-10 rounded-xl items-center justify-center"
-                                                style={{
-                                                    backgroundColor: style.bg,
-                                                }}
-                                            >
-                                                <Ionicons
-                                                    name={style.icon}
-                                                    size={20}
-                                                    color={style.color}
-                                                />
-                                            </View>
+                                            <Ionicons
+                                                name={option.icon}
+                                                size={20}
+                                                color={option.color}
+                                            />
+                                        </View>
+                                        <View className="ml-3 flex-1">
                                             <Text
-                                                className="text-sm font-bold ml-2 flex-1"
+                                                className="text-sm font-bold"
                                                 style={{
                                                     color: selected
-                                                        ? style.color
-                                                        : '#475569',
+                                                        ? option.color
+                                                        : '#334155',
                                                 }}
                                             >
-                                                {type}
+                                                {option.label}
                                             </Text>
-                                            {selected && (
-                                                <Ionicons
-                                                    name="checkmark-circle"
-                                                    size={18}
-                                                    color={style.color}
-                                                />
-                                            )}
-                                        </TouchableOpacity>
-                                    );
-                                })}
-                            </View>
+                                            <Text className="text-[#64748B] text-xs mt-0.5">
+                                                {option.description}
+                                            </Text>
+                                        </View>
+                                        {selected && (
+                                            <Ionicons
+                                                name="checkmark-circle"
+                                                size={21}
+                                                color={option.color}
+                                            />
+                                        )}
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
-                    )}
+                    </View>
 
                     <View className="bg-white rounded-3xl p-4 border border-slate-100 shadow-xl">
-                        <FormLabel
-                            label={isIssue ? 'Issue title' : 'Complaint title'}
-                        />
+                        <FormLabel label="Title" />
                         <TextInput
                             value={title}
                             onChangeText={setTitle}
-                            placeholder={
-                                isIssue
-                                    ? 'Example: Bathroom light is not working'
-                                    : 'Briefly summarize your complaint'
-                            }
+                            placeholder="Example: Bathroom light is not working"
                             placeholderTextColor="#94A3B8"
+                            maxLength={200}
+                            editable={!isSubmitting}
+                            onFocus={revealFocusedField}
                             className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-[#1E293B] text-sm mt-2"
                         />
+                        <Text className="text-[#94A3B8] text-[11px] text-right mt-1">
+                            {title.length}/200
+                        </Text>
 
-                        <View className="mt-5">
+                        <View className="mt-4">
                             <FormLabel label="Description" />
                             <TextInput
                                 value={description}
                                 onChangeText={setDescription}
-                                placeholder="Describe what happened, where, and any details that may help."
+                                placeholder="Describe what happened, where it happened, and details that can help management."
                                 placeholderTextColor="#94A3B8"
                                 multiline
                                 textAlignVertical="top"
+                                editable={!isSubmitting}
+                                onFocus={revealFocusedField}
                                 className="min-h-32 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-[#1E293B] text-sm mt-2"
                             />
-                        </View>
-
-                        <View className="mt-5">
-                            <FormLabel label="Priority" />
-                            <View className="flex-row mt-2">
-                                {studentPriorityOptions.map((option, index) => {
-                                    const selected = priority === option;
-                                    const color =
-                                        option === 'Urgent'
-                                            ? '#DC2626'
-                                            : option === 'Medium'
-                                              ? '#D97706'
-                                              : '#16A34A';
-
-                                    return (
-                                        <TouchableOpacity
-                                            key={option}
-                                            activeOpacity={0.75}
-                                            onPress={() => setPriority(option)}
-                                            className={`flex-1 rounded-xl border py-3 items-center ${
-                                                index === 1 ? 'mx-2' : ''
-                                            }`}
-                                            style={{
-                                                borderColor: selected
-                                                    ? color
-                                                    : '#E2E8F0',
-                                                backgroundColor: selected
-                                                    ? `${color}12`
-                                                    : '#FFFFFF',
-                                            }}
-                                        >
-                                            <Text
-                                                className="text-xs font-bold"
-                                                style={{
-                                                    color: selected
-                                                        ? color
-                                                        : '#64748B',
-                                                }}
-                                            >
-                                                {option}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    );
-                                })}
-                            </View>
                         </View>
 
                         <View className="h-px bg-slate-100 my-5" />
                         <AttachmentPicker
                             attachments={attachments}
-                            accentColor={accentColor}
-                            accentBg={accentBg}
+                            accentColor="#EA580C"
+                            accentBg="#FFF7ED"
                             onChange={setAttachments}
                         />
                     </View>
 
                     <TouchableOpacity
                         activeOpacity={0.8}
+                        disabled={isSubmitting}
                         onPress={handleSubmit}
-                        className="rounded-2xl py-4 items-center mt-5"
-                        style={{ backgroundColor: accentColor }}
+                        className={`rounded-2xl py-4 items-center mt-5 ${
+                            isSubmitting ? 'bg-orange-300' : 'bg-[#EA580C]'
+                        }`}
                     >
                         <Text className="text-white text-base font-bold">
-                            {isIssue ? 'Submit issue' : 'Submit complaint'}
+                            {isSubmitting
+                                ? 'Submitting ticket...'
+                                : 'Submit issue ticket'}
                         </Text>
                     </TouchableOpacity>
                 </View>

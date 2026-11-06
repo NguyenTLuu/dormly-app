@@ -17,10 +17,6 @@ export default function AuthLayout() {
                 name="forgot-pass"
                 options={{ title: 'Reset Password' }}
             />
-            <Stack.Screen
-                name="first-time-login"
-                options={{ title: 'Change Password' }}
-            />
         </Stack>
     );
 }

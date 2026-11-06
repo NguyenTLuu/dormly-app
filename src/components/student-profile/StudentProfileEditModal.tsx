@@ -28,6 +28,7 @@ interface StudentProfileEditModalProps {
     onChange: (form: StudentProfileForm) => void;
     onClose: () => void;
     onSave: () => void;
+    pending?: boolean;
 }
 
 export default function StudentProfileEditModal({
@@ -36,6 +37,7 @@ export default function StudentProfileEditModal({
     onChange,
     onClose,
     onSave,
+    pending = false,
 }: StudentProfileEditModalProps) {
     const { height } = useWindowDimensions();
 
@@ -45,7 +47,6 @@ export default function StudentProfileEditModal({
             return;
         }
         onSave();
-        toast.success('Profile information updated');
     };
 
     return (
@@ -176,10 +177,11 @@ export default function StudentProfileEditModal({
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={handleSave}
+                                disabled={pending}
                                 className="flex-1 bg-blue-600 py-4 rounded-2xl items-center ml-2"
                             >
                                 <Text className="text-white font-bold">
-                                    Save changes
+                                    {pending ? 'Saving...' : 'Save changes'}
                                 </Text>
                             </TouchableOpacity>
                         </View>

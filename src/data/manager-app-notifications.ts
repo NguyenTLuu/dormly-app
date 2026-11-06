@@ -34,7 +34,7 @@ export const managerAppNotifications: ManagerAppNotification[] = [
     {
         id: 'MAN-NOT-03',
         title: 'Room capacity updated',
-        message: 'Room A102 information was updated by Nguyen Minh Manager.',
+        message: 'Room A102 information was updated by Nguyen Minh Staff.',
         priority: 'Normal',
         source: 'Room',
         createdAt: '07 Jun 2026, 08:45',

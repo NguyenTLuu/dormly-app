@@ -356,7 +356,7 @@ export const managerReportSummaries: ReportSummary[] = [
         id: 'transfer-requests',
         title: 'Transfer requests',
         value: `${openTransferRequests.length} active`,
-        description: 'Room transfer requests waiting for manager action',
+        description: 'Room transfer requests waiting for staff action',
     },
 ];
 

@@ -1,22 +1,13 @@
-import { ActivityIndicator, View } from 'react-native';
+import { useAuth } from '@/auth/AuthContext';
 import { Redirect } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-
-const useAuth = () => {
-    // Todo: replace with actual logic to get user data (Redux/Zustand/AsyncStorage)
-    return {
-        isLoading: false,
-        isAuthenticated: false,
-        userRole: 'STUDENT',
-    };
-};
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
 export default function IndexScreen() {
-    const { isLoading, isAuthenticated, userRole } = useAuth();
+    const { isBootstrapping, isAuthenticated, hasRole, signOut } = useAuth();
 
-    if (isLoading) {
+    if (isBootstrapping) {
         return (
-            <View className="flex-1 justify-center items-center bg-white">
+            <View className="flex-1 items-center justify-center bg-white">
                 <ActivityIndicator size="large" color="#2563EB" />
             </View>
         );
@@ -26,9 +17,27 @@ export default function IndexScreen() {
         return <Redirect href="/(auth)/login" />;
     }
 
-    if (userRole === 'MANAGER') {
-        return <Redirect href="/(manager)/dashboard" />;
+    // Staff and Admin share the operational Admin dashboard.
+    if (hasRole('ADMIN', 'STAFF')) {
+        return <Redirect href="/(admin)/dashboard" />;
     }
 
-    return <Redirect href="/(student)/home" />;
+    if (hasRole('USER')) {
+        return <Redirect href="/(user)/home" />;
+    }
+
+    return (
+        <View className="flex-1 items-center justify-center bg-white px-6">
+            <Text className="text-center text-base text-slate-700">
+                This account does not have a supported role. Contact an
+                administrator to assign USER, STAFF, or ADMIN.
+            </Text>
+            <TouchableOpacity
+                onPress={() => void signOut()}
+                className="mt-5 rounded-xl bg-blue-600 px-6 py-3"
+            >
+                <Text className="font-semibold text-white">Log out</Text>
+            </TouchableOpacity>
+        </View>
+    );
 }

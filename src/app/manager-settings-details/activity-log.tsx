@@ -1,111 +1,263 @@
-import { ManagerHeader } from '@/components/manager-dashboard';
-import { ActivityActorRole, activityLog } from '@/data/activity-log';
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
 import {
+    getAuditLogFilterOptions,
+    getAuditLogPage,
+} from '@/api/operationalInsightsApi';
+import { ManagerHeader } from '@/components/manager-dashboard';
+import {
+    ManagementChoice,
+    ManagementSheet,
+} from '@/components/manager-management/ManagementFormControls';
+import { Ionicons } from '@expo/vector-icons';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+    ActivityIndicator,
+    RefreshControl,
     ScrollView,
-    StatusBar,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
 
-type ActivityFilter = 'All' | ActivityActorRole;
-
 export default function ManagerActivityLogScreen() {
     const router = useRouter();
-    const [filter, setFilter] = useState<ActivityFilter>('All');
-    const [, refreshLog] = useState(0);
-
-    useFocusEffect(
-        useCallback(() => {
-            refreshLog((value) => value + 1);
-        }, [])
+    const [action, setAction] = useState('');
+    const [entity, setEntity] = useState('');
+    const [openSelect, setOpenSelect] = useState<'action' | 'entity' | null>(
+        null
     );
-
-    const filteredLog = activityLog.filter(
-        (item) => filter === 'All' || item.actorRole === filter
-    );
-
+    const filterOptions = useQuery({
+        queryKey: ['audit-log-filter-options'],
+        queryFn: getAuditLogFilterOptions,
+        staleTime: 60_000,
+    });
+    const query = useInfiniteQuery({
+        queryKey: ['audit-logs', action, entity],
+        initialPageParam: 0,
+        queryFn: ({ pageParam }) => getAuditLogPage(pageParam, action, entity),
+        getNextPageParam: (last) =>
+            last.last || last.number + 1 >= last.totalPages
+                ? undefined
+                : last.number + 1,
+    });
+    const entries = query.data?.pages.flatMap((page) => page.content) ?? [];
+    const total = query.data?.pages[0]?.totalElements ?? 0;
+    const refresh = () => {
+        void query.refetch();
+        void filterOptions.refetch();
+    };
+    const actionOptions = [
+        { value: '', label: 'All actions' },
+        ...(filterOptions.data?.actions ?? []).map((value) => ({
+            value,
+            label: value,
+        })),
+    ];
+    const entityOptions = [
+        { value: '', label: 'All entity types' },
+        ...(filterOptions.data?.entityTypes ?? []).map((value) => ({
+            value,
+            label: value,
+        })),
+    ];
     return (
         <View className="flex-1 bg-[#F4FAFD]">
-            <StatusBar
-                translucent
-                backgroundColor="transparent"
-                barStyle="light-content"
-            />
             <ManagerHeader
-                title="Activity Log"
-                subtitle="Review manager, student, and system activity"
+                title="Audit Log"
+                subtitle="Recorded backend activity"
                 onBack={() => router.back()}
             />
-            <View className="-mt-8 flex-1 px-4">
-                <View className="bg-white rounded-2xl p-1.5 border border-gray-100 shadow-xl flex-row">
-                    {(
-                        [
-                            'All',
-                            'Manager',
-                            'Student',
-                            'System',
-                        ] as ActivityFilter[]
-                    ).map((option) => (
+            <ScrollView
+                className="-mt-8 px-4"
+                contentContainerStyle={{ paddingBottom: 40, gap: 14 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={
+                            query.isRefetching || filterOptions.isRefetching
+                        }
+                        onRefresh={refresh}
+                    />
+                }
+            >
+                <View className="bg-white border border-slate-100 rounded-2xl p-4 gap-3">
+                    <Text className="text-slate-800 font-bold">
+                        Filter audit records
+                    </Text>
+                    <AuditFilterSelect
+                        label="Action code"
+                        value={action || 'All actions'}
+                        disabled={
+                            filterOptions.isLoading || filterOptions.isError
+                        }
+                        onPress={() => setOpenSelect('action')}
+                    />
+                    <AuditFilterSelect
+                        label="Entity type"
+                        value={entity || 'All entity types'}
+                        disabled={
+                            filterOptions.isLoading || filterOptions.isError
+                        }
+                        onPress={() => setOpenSelect('entity')}
+                    />
+                    {filterOptions.isLoading ? (
+                        <Text className="text-slate-500 text-xs">
+                            Loading available filter values...
+                        </Text>
+                    ) : null}
+                    {filterOptions.isError ? (
                         <TouchableOpacity
-                            key={option}
-                            onPress={() => setFilter(option)}
-                            className={`flex-1 rounded-xl py-2.5 items-center ${
-                                filter === option ? 'bg-blue-600' : 'bg-white'
-                            }`}
+                            onPress={() => void filterOptions.refetch()}
                         >
-                            <Text
-                                className={`text-xs font-bold ${
-                                    filter === option
-                                        ? 'text-white'
-                                        : 'text-[#64748B]'
-                                }`}
-                            >
-                                {option}
+                            <Text className="text-red-700 text-xs font-semibold">
+                                Could not load filter values. Tap to retry.
                             </Text>
                         </TouchableOpacity>
-                    ))}
+                    ) : null}
+                    <Text className="text-slate-400 text-xs">
+                        Select a code to filter immediately. Values come from
+                        recorded events.
+                    </Text>
                 </View>
-                <ScrollView
-                    className="flex-1 mt-4"
-                    contentContainerStyle={{ gap: 10, paddingBottom: 24 }}
-                >
-                    {filteredLog.map((activity) => (
-                        <View
-                            key={activity.id}
-                            className="bg-white rounded-2xl p-4 border border-gray-100 shadow-xl flex-row items-start"
-                        >
+                {query.isLoading ? <ActivityIndicator color="#2563EB" /> : null}
+                {query.isError ? (
+                    <TouchableOpacity
+                        onPress={() => void query.refetch()}
+                        className="bg-red-50 rounded-2xl p-4"
+                    >
+                        <Text className="text-red-700">
+                            Could not load audit records. Tap to retry.
+                        </Text>
+                    </TouchableOpacity>
+                ) : null}
+                {query.data ? (
+                    <>
+                        <Text className="text-slate-700 font-bold">
+                            {total} recorded events
+                        </Text>
+                        {entries.map((entry) => (
                             <View
-                                className="w-11 h-11 rounded-full items-center justify-center"
-                                style={{
-                                    backgroundColor: `${activity.color}18`,
-                                }}
+                                key={entry.id}
+                                className="bg-white border border-slate-100 rounded-2xl p-4 gap-1"
                             >
-                                <Ionicons
-                                    name={activity.icon}
-                                    size={20}
-                                    color={activity.color}
-                                />
+                                <Text className="text-slate-800 font-bold">
+                                    {formatCode(entry.action)}
+                                </Text>
+                                <Text className="text-blue-700 text-xs font-semibold">
+                                    Action code: {entry.action}
+                                </Text>
+                                <Text className="text-violet-700 text-xs font-semibold">
+                                    Entity type: {entry.entityType || '—'}
+                                </Text>
+                                <Text className="text-slate-600">
+                                    {entry.userFullName ||
+                                        entry.userEmail ||
+                                        'System'}
+                                    {entry.userFullName && entry.userEmail
+                                        ? ` · ${entry.userEmail}`
+                                        : ''}
+                                </Text>
+                                {entry.entityId ? (
+                                    <Text className="text-slate-500 text-sm">
+                                        Entity ID: {entry.entityId}
+                                    </Text>
+                                ) : null}
+                                <Text className="text-slate-400 text-xs">
+                                    {formatDate(entry.createdAt)}
+                                </Text>
                             </View>
-                            <View className="ml-3 flex-1">
-                                <Text className="text-[#1E293B] text-sm font-bold">
-                                    {activity.action}
+                        ))}
+                        {!entries.length ? (
+                            <Text className="bg-white rounded-2xl p-5 text-slate-500">
+                                No audit records match these filters.
+                            </Text>
+                        ) : null}
+                        {query.hasNextPage ? (
+                            <TouchableOpacity
+                                disabled={query.isFetchingNextPage}
+                                onPress={() => void query.fetchNextPage()}
+                                className="bg-blue-50 rounded-xl p-3 items-center"
+                            >
+                                <Text className="text-blue-700 font-bold">
+                                    {query.isFetchingNextPage
+                                        ? 'Loading...'
+                                        : 'Load more'}
                                 </Text>
-                                <Text className="text-[#64748B] text-xs font-medium mt-1">
-                                    {activity.detail}
-                                </Text>
-                                <Text className="text-[#94A3B8] text-[10px] font-bold mt-2">
-                                    {activity.time} - {activity.actorName} (
-                                    {activity.actorRole})
-                                </Text>
-                            </View>
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
+                            </TouchableOpacity>
+                        ) : null}
+                    </>
+                ) : null}
+            </ScrollView>
+            {openSelect ? (
+                <ManagementSheet
+                    title={
+                        openSelect === 'action'
+                            ? 'Select action code'
+                            : 'Select entity type'
+                    }
+                    onClose={() => setOpenSelect(null)}
+                >
+                    <ManagementChoice
+                        label={
+                            openSelect === 'action'
+                                ? 'Action code'
+                                : 'Entity type'
+                        }
+                        value={openSelect === 'action' ? action : entity}
+                        options={
+                            openSelect === 'action'
+                                ? actionOptions
+                                : entityOptions
+                        }
+                        onChange={(value) => {
+                            if (openSelect === 'action') setAction(value);
+                            else setEntity(value);
+                            setOpenSelect(null);
+                        }}
+                    />
+                </ManagementSheet>
+            ) : null}
         </View>
     );
+}
+
+function AuditFilterSelect({
+    label,
+    value,
+    disabled,
+    onPress,
+}: {
+    label: string;
+    value: string;
+    disabled: boolean;
+    onPress: () => void;
+}) {
+    return (
+        <TouchableOpacity
+            disabled={disabled}
+            onPress={onPress}
+            accessibilityRole="button"
+            accessibilityLabel={`${label}: ${value}`}
+            className={`rounded-xl border border-slate-200 p-3 flex-row items-center justify-between ${disabled ? 'opacity-50' : ''}`}
+        >
+            <View>
+                <Text className="text-slate-500 text-xs font-semibold">
+                    {label}
+                </Text>
+                <Text className="text-slate-800 font-bold mt-1">{value}</Text>
+            </View>
+            <Ionicons name="chevron-down" size={18} color="#64748B" />
+        </TouchableOpacity>
+    );
+}
+
+function formatCode(value: string) {
+    return value
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatDate(value: string) {
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) ? date.toLocaleString() : value;
 }

@@ -151,7 +151,7 @@ export default function TicketDetailScreen() {
                     {transferStatus !== 'Resolved' && (
                         <View className="bg-white rounded-3xl p-4 border border-gray-100 shadow-xl">
                             <RequestModalSectionTitle
-                                title="Manager Action"
+                                title="Staff Action"
                                 icon="shield-checkmark-outline"
                                 color="#2563EB"
                                 bgColor="#DBEAFE"
@@ -179,7 +179,7 @@ export default function TicketDetailScreen() {
                                         toast.error('Transfer denied', {
                                             description:
                                                 denialReason ||
-                                                'Denied by manager review.',
+                                                'Denied by staff review.',
                                         })
                                     }
                                 />
@@ -210,8 +210,8 @@ export default function TicketDetailScreen() {
         addActivityLog({
             action: 'Assigned ticket handler',
             detail: `${work.id} assigned to ${handler}.`,
-            actorName: 'Nguyen Minh Manager',
-            actorRole: 'Manager',
+            actorName: 'Nguyen Minh Staff',
+            actorRole: 'Staff',
             time: 'Just now',
             icon: 'ticket-outline',
             color: accentColor,
@@ -226,8 +226,8 @@ export default function TicketDetailScreen() {
         addActivityLog({
             action: 'Changed ticket progress',
             detail: `${work.id} moved to ${status}.`,
-            actorName: 'Nguyen Minh Manager',
-            actorRole: 'Manager',
+            actorName: 'Nguyen Minh Staff',
+            actorRole: 'Staff',
             time: 'Just now',
             icon: 'git-compare-outline',
             color: accentColor,

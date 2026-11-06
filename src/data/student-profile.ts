@@ -1,5 +1,5 @@
 export interface UploadedStudentDocument {
-    id: 'citizen-id' | 'temporary-residence';
+    id: 'citizen-id-front' | 'citizen-id-back' | 'temporary-residence';
     title: string;
     description: string;
     status: 'Uploaded' | 'Missing';
@@ -9,19 +9,21 @@ export interface UploadedStudentDocument {
 
 export const studentProfileDocuments: UploadedStudentDocument[] = [
     {
-        id: 'citizen-id',
-        title: 'Citizen ID',
-        description: 'Front/back image or a single PDF document',
-        status: 'Uploaded',
-        fileName: 'citizen-id-2231200123.jpg',
-        uri: 'mock://documents/citizen-id/2231200123.jpg',
+        id: 'citizen-id-front',
+        title: 'Citizen ID — Front',
+        description: 'Clear image or PDF of the front side',
+        status: 'Missing',
+    },
+    {
+        id: 'citizen-id-back',
+        title: 'Citizen ID — Back',
+        description: 'Clear image or PDF of the back side',
+        status: 'Missing',
     },
     {
         id: 'temporary-residence',
         title: 'Temporary Residence',
         description: 'Temporary residence confirmation document',
-        status: 'Uploaded',
-        fileName: 'temporary-residence-2231200123.jpg',
-        uri: 'mock://documents/temporary-residence/2231200123.jpg',
+        status: 'Missing',
     },
 ];

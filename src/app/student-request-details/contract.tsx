@@ -135,7 +135,7 @@ export default function StudentContractScreen() {
                         <TermRow text="Keep the assigned room and shared spaces clean." />
                         <TermRow text="Report damages and safety issues promptly." />
                         <TermRow
-                            text="Room transfers require manager approval."
+                            text="Room transfers require staff approval."
                             isLast
                         />
                     </View>

@@ -5,7 +5,6 @@ export type NotificationAudienceScope =
     | 'Selected blocks'
     | 'Selected floors'
     | 'Selected rooms';
-export type AccountRequestStatus = 'Pending' | 'Approved' | 'Rejected';
 
 export interface NotificationDraftInput {
     title: string;
@@ -27,16 +26,6 @@ export interface ManagerNotification {
     createdAt: string;
 }
 
-export interface AccountRequest {
-    id: string;
-    name: string;
-    studentId: string;
-    email: string;
-    major: string;
-    submittedAt: string;
-    status: AccountRequestStatus;
-    rejectionReason?: string;
-}
 
 export const managerNotifications: ManagerNotification[] = [
     {
@@ -108,54 +97,11 @@ export const notificationAudienceOptions: Record<
     ],
 };
 
-export const newAccountRequests: AccountRequest[] = [
-    {
-        id: 'ACC-2041',
-        name: 'Vo Minh Quan',
-        studentId: '2231201512',
-        email: 'quan.vm@fpt.edu.vn',
-        major: 'Software Engineering',
-        submittedAt: '06 Jun 2026, 09:20',
-        status: 'Pending',
-    },
-    {
-        id: 'ACC-2039',
-        name: 'Nguyen Thanh Truc',
-        studentId: '2231201468',
-        email: 'truc.nt@fpt.edu.vn',
-        major: 'Digital Marketing',
-        submittedAt: '05 Jun 2026, 18:45',
-        status: 'Pending',
-    },
-    {
-        id: 'ACC-2034',
-        name: 'Le Gia Bao',
-        studentId: '2231201390',
-        email: 'bao.lg@fpt.edu.vn',
-        major: 'Artificial Intelligence',
-        submittedAt: '04 Jun 2026, 13:10',
-        status: 'Approved',
-    },
-    {
-        id: 'ACC-2028',
-        name: 'Tran Yen Nhi',
-        studentId: '2231201274',
-        email: 'nhi.ty@fpt.edu.vn',
-        major: 'Graphic Design',
-        submittedAt: '03 Jun 2026, 16:40',
-        status: 'Rejected',
-        rejectionReason: 'Student ID document is unreadable.',
-    },
-];
-
 export const dashboardActionSummary = {
     draftNotifications: managerNotifications.filter(
         (notification) => notification.status === 'Draft'
     ).length,
     scheduledNotifications: managerNotifications.filter(
         (notification) => notification.status === 'Scheduled'
-    ).length,
-    pendingAccounts: newAccountRequests.filter(
-        (request) => request.status === 'Pending'
     ).length,
 };

@@ -27,8 +27,8 @@ const priorityStyle: Record<
 
 interface NotificationCardProps {
     notification: ManagerNotification;
-    onSend: (id: string) => void;
-    onDelete: (id: string) => void;
+    onSend?: (id: string) => void;
+    onDelete?: (id: string) => void;
 }
 
 export default function NotificationCard({
@@ -95,7 +95,7 @@ export default function NotificationCard({
                     {notification.createdAt}
                 </Text>
             </View>
-            {notification.status !== 'Sent' ? (
+            {onSend && notification.status !== 'Sent' ? (
                 <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => onSend(notification.id)}
@@ -106,7 +106,7 @@ export default function NotificationCard({
                         Send now
                     </Text>
                 </TouchableOpacity>
-            ) : (
+            ) : onDelete && notification.status === 'Sent' ? (
                 <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => onDelete(notification.id)}
@@ -117,7 +117,7 @@ export default function NotificationCard({
                         Delete sent notification
                     </Text>
                 </TouchableOpacity>
-            )}
+            ) : null}
         </View>
     );
 }

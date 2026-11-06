@@ -1,4 +1,4 @@
-import { StudentAttachment } from '@/data/student-requests';
+import type { TicketAttachment } from '@/types/ticket';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import React from 'react';
@@ -6,10 +6,10 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { toast } from 'sonner-native';
 
 interface AttachmentPickerProps {
-    attachments: StudentAttachment[];
+    attachments: TicketAttachment[];
     accentColor: string;
     accentBg: string;
-    onChange: (attachments: StudentAttachment[]) => void;
+    onChange: (attachments: TicketAttachment[]) => void;
 }
 
 const formatFileSize = (size?: number) => {
@@ -51,7 +51,7 @@ export default function AttachmentPicker({
                 Attachments
             </Text>
             <Text className="text-[#94A3B8] text-xs font-medium mt-1">
-                Add photos, videos, or PDF files to help the manager review.
+                Add photos, videos, or PDF files to help staff review.
             </Text>
 
             {attachments.map((attachment) => (

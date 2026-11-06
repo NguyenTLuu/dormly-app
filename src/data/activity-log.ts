@@ -1,4 +1,4 @@
-export type ActivityActorRole = 'Manager' | 'Student' | 'System';
+export type ActivityActorRole = 'Staff' | 'Student' | 'System';
 
 export interface ActivityLogItem {
     id: string;
@@ -22,8 +22,8 @@ export const activityLog: ActivityLogItem[] = [
         id: 'activity-1',
         action: 'Updated room information',
         detail: 'Changed Room A102 capacity and amenities.',
-        actorName: 'Nguyen Minh Manager',
-        actorRole: 'Manager',
+        actorName: 'Nguyen Minh Staff',
+        actorRole: 'Staff',
         time: '07 Jun 2026, 09:45',
         icon: 'business-outline',
         color: '#2563EB',
@@ -32,8 +32,8 @@ export const activityLog: ActivityLogItem[] = [
         id: 'activity-2',
         action: 'Changed ticket progress',
         detail: 'Issue INC-1024 moved to In Progress.',
-        actorName: 'Nguyen Minh Manager',
-        actorRole: 'Manager',
+        actorName: 'Nguyen Minh Staff',
+        actorRole: 'Staff',
         time: '07 Jun 2026, 09:20',
         icon: 'git-compare-outline',
         color: '#7C3AED',
@@ -52,8 +52,8 @@ export const activityLog: ActivityLogItem[] = [
         id: 'activity-4',
         action: 'Sent resident notification',
         detail: 'Monthly room inspection sent to all residents.',
-        actorName: 'Nguyen Minh Manager',
-        actorRole: 'Manager',
+        actorName: 'Nguyen Minh Staff',
+        actorRole: 'Staff',
         time: '06 Jun 2026, 14:30',
         icon: 'notifications-outline',
         color: '#0EA5E9',
@@ -71,9 +71,9 @@ export const activityLog: ActivityLogItem[] = [
     {
         id: 'activity-6',
         action: 'Updated display name',
-        detail: 'Manager profile information was updated.',
-        actorName: 'Nguyen Minh Manager',
-        actorRole: 'Manager',
+        detail: 'Staff profile information was updated.',
+        actorName: 'Nguyen Minh Staff',
+        actorRole: 'Staff',
         time: '05 Jun 2026, 17:15',
         icon: 'person-outline',
         color: '#DB2777',
